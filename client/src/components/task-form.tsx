@@ -36,7 +36,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }: TaskFormProps) 
       priority: defaultValues?.priority || "medium",
       status: defaultValues?.status || "pending",
       estimatedDuration: defaultValues?.estimatedDuration || undefined,
-      deadline: defaultValues?.deadline ? new Date(defaultValues.deadline).toISOString().split('T')[0] : undefined,
+      deadline: defaultValues?.deadline ? new Date(defaultValues.deadline).toISOString().split('T')[0] as any : undefined,
       completed: defaultValues?.completed || false,
     },
   });
@@ -52,7 +52,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }: TaskFormProps) 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="title"
               render={({ field }) => (
                 <FormItem>
@@ -70,7 +70,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }: TaskFormProps) 
             />
 
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="description"
               render={({ field }) => (
                 <FormItem>
@@ -90,7 +90,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }: TaskFormProps) 
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="priority"
                 render={({ field }) => (
                   <FormItem>
@@ -114,7 +114,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }: TaskFormProps) 
               />
 
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="estimatedDuration"
                 render={({ field }) => (
                   <FormItem>
@@ -138,7 +138,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }: TaskFormProps) 
             </div>
 
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="deadline"
               render={({ field }) => (
                 <FormItem>
@@ -147,7 +147,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }: TaskFormProps) 
                     <Input
                       type="date"
                       {...field}
-                      value={field.value || ""}
+                      value={field.value ? (typeof field.value === 'string' ? field.value : new Date(field.value as any).toISOString().split('T')[0]) : ""}
                       data-testid="input-task-deadline"
                     />
                   </FormControl>

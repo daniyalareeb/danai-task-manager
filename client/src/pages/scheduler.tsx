@@ -85,7 +85,7 @@ export default function Scheduler() {
     const endTime = startTime ? calculateEndTime(startTime, parseFloat(hours)) : undefined;
 
     addAvailabilityMutation.mutate({
-      date,
+      date: date as any,
       availableHours: parseFloat(hours),
       startTime,
       endTime,

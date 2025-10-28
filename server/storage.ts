@@ -40,6 +40,7 @@ export class MemStorage implements IStorage {
     const task: Task = {
       ...insertTask,
       id,
+      description: insertTask.description ?? null,
       createdAt: now,
       completedAt: insertTask.completed ? now : null,
       aiPriority: null,
@@ -80,6 +81,8 @@ export class MemStorage implements IStorage {
     const availability: Availability = {
       ...insertAvailability,
       id,
+      startTime: insertAvailability.startTime ?? null,
+      endTime: insertAvailability.endTime ?? null,
       createdAt: new Date(),
     };
     this.availability.set(id, availability);

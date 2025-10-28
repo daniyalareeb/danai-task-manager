@@ -123,7 +123,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tasks = await storage.getAllTasks();
       const availability = await storage.getAllAvailability();
 
-      const scheduleResponse = await generateSchedule(tasks, availability);
+      const mappedAvailability = availability.map(a => ({
+        date: a.date,
+        availableHours: a.availableHours,
+        startTime: a.startTime ?? undefined,
+        endTime: a.endTime ?? undefined,
+      }));
+
+      const scheduleResponse = await generateSchedule(tasks, mappedAvailability);
 
       // Update tasks with schedule
       for (const scheduleItem of scheduleResponse.schedule) {
