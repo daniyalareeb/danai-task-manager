@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: danai-task-manager
+    env: node
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: danai-db
+          property: connectionString
+      - key: OPENROUTER_API_KEY
+        sync: false
+    healthCheckPath: /api/tasks
+    autoDeploy: true
+
+databases:
+  - name: danai-db
+    plan: free
+    databaseName: danai
+    user: danai
+

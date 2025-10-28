@@ -11,11 +11,12 @@ import { useNotifications } from "@/hooks/use-notifications";
 import Dashboard from "@/pages/dashboard";
 import Tasks from "@/pages/tasks";
 import NewTask from "@/pages/new-task";
-import Scheduler from "@/pages/scheduler";
+import Scheduler from "@/pages/scheduler-enhanced";
 import Scheduled from "@/pages/scheduled";
 import Completed from "@/pages/completed";
 import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
+import { QuickAdd } from "@/components/quick-add";
 
 function Router() {
   return (
@@ -36,17 +37,18 @@ function AppContent() {
   useNotifications();
 
   return (
-    <div className="flex h-screen w-full">
+    <div className="flex h-screen w-full bg-gradient-to-br from-background via-background to-primary/5">
       <AppSidebar />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <header className="flex items-center justify-between p-4 border-b border-border">
-          <SidebarTrigger data-testid="button-sidebar-toggle" />
+      <div className="flex flex-col flex-1 overflow-hidden relative">
+        <header className="flex items-center justify-between p-4 border-b border-border/50 backdrop-blur-md bg-background/80 sticky top-0 z-40">
+          <SidebarTrigger data-testid="button-sidebar-toggle" className="hover:bg-accent/50 transition-colors" />
           <ThemeToggle />
         </header>
         <main className="flex-1 overflow-auto p-6">
           <Router />
         </main>
       </div>
+      <QuickAdd />
     </div>
   );
 }

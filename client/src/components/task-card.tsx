@@ -39,7 +39,7 @@ export function TaskCard({ task, onToggleComplete, onDelete, onEdit, showAiInsig
   const isOverdue = task.deadline && new Date(task.deadline) < new Date() && !isCompleted;
 
   return (
-    <Card className={`hover-elevate ${isCompleted ? "opacity-60" : ""}`} data-testid={`card-task-${task.id}`}>
+    <Card className={`hover:shadow-lg hover:scale-[1.01] transition-all duration-300 ${isCompleted ? "opacity-60" : ""} ${isOverdue ? "border-destructive/50 animate-pulse" : ""}`} data-testid={`card-task-${task.id}`}>
       <CardHeader className="flex flex-row items-start gap-4 space-y-0 pb-3">
         <Checkbox
           checked={isCompleted}
@@ -113,12 +113,15 @@ export function TaskCard({ task, onToggleComplete, onDelete, onEdit, showAiInsig
           )}
         </div>
         {showAiInsights && task.aiReasoning && (
-          <div className="mt-3 p-3 rounded-md bg-primary/5 border border-primary/20" data-testid={`text-ai-reasoning-${task.id}`}>
-            <div className="flex items-start gap-2">
-              <Sparkles className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-xs font-medium text-primary mb-1">AI Insight</p>
-                <p className="text-sm text-foreground">{task.aiReasoning}</p>
+          <div className="mt-3 p-4 rounded-lg bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 relative overflow-hidden group" data-testid={`text-ai-reasoning-${task.id}`}>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 animate-pulse" />
+            <div className="flex items-start gap-3 relative">
+              <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-primary mb-1.5">AI Insight</p>
+                <p className="text-sm text-foreground leading-relaxed">{task.aiReasoning}</p>
               </div>
             </div>
           </div>

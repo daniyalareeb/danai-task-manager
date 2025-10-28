@@ -199,41 +199,51 @@ export default function Scheduler() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
-              <div className="p-4 rounded-md bg-primary/5 border border-primary/20">
-                <h3 className="font-medium mb-2 flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-primary" />
-                  Prioritize Tasks
-                </h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Let AI analyze your {activeTasks.length} active tasks and determine which ones to focus on first.
-                </p>
-                <Button
-                  onClick={() => prioritizeTasksMutation.mutate()}
-                  disabled={prioritizeTasksMutation.isPending || activeTasks.length === 0}
-                  variant="outline"
-                  className="w-full"
-                  data-testid="button-prioritize-tasks"
-                >
-                  {prioritizeTasksMutation.isPending ? "Analyzing..." : "Prioritize with AI"}
-                </Button>
+              <div className="p-5 rounded-lg bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border border-amber-200 dark:border-amber-900 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-500/5 to-amber-500/0 animate-pulse" />
+                <div className="relative">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-full bg-amber-500/20 flex items-center justify-center">
+                      <Zap className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    Prioritize Tasks
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Let AI analyze your {activeTasks.length} active tasks and determine which ones to focus on first.
+                  </p>
+                  <Button
+                    onClick={() => prioritizeTasksMutation.mutate()}
+                    disabled={prioritizeTasksMutation.isPending || activeTasks.length === 0}
+                    variant="outline"
+                    className="w-full border-amber-300 hover:bg-amber-50 dark:border-amber-800 dark:hover:bg-amber-950/30"
+                    data-testid="button-prioritize-tasks"
+                  >
+                    {prioritizeTasksMutation.isPending ? "Analyzing..." : "Prioritize with AI"}
+                  </Button>
+                </div>
               </div>
 
-              <div className="p-4 rounded-md bg-primary/5 border border-primary/20">
-                <h3 className="font-medium mb-2 flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-primary" />
-                  Generate Schedule
-                </h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Create an optimized schedule based on your availability and task priorities.
-                </p>
-                <Button
-                  onClick={() => generateScheduleMutation.mutate()}
-                  disabled={generateScheduleMutation.isPending || activeTasks.length === 0 || availability.length === 0}
-                  className="w-full"
-                  data-testid="button-generate-schedule"
-                >
-                  {generateScheduleMutation.isPending ? "Generating..." : "Generate Schedule"}
-                </Button>
+              <div className="p-5 rounded-lg bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20 border border-purple-200 dark:border-purple-900 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/5 to-purple-500/0 animate-pulse" />
+                <div className="relative">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-full bg-purple-500/20 flex items-center justify-center">
+                      <Calendar className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    Generate Schedule
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Create an optimized schedule based on your availability and task priorities.
+                  </p>
+                  <Button
+                    onClick={() => generateScheduleMutation.mutate()}
+                    disabled={generateScheduleMutation.isPending || activeTasks.length === 0 || availability.length === 0}
+                    className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                    data-testid="button-generate-schedule"
+                  >
+                    {generateScheduleMutation.isPending ? "Generating..." : "Generate Schedule"}
+                  </Button>
+                </div>
               </div>
             </div>
 

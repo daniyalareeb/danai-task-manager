@@ -15,6 +15,7 @@ import { CheckCircle2, Calendar, ListTodo, Sparkles, Settings, Zap } from "lucid
 import { useQuery } from "@tanstack/react-query";
 import { Task } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
+import { PWAInstall } from "./pwa-install";
 
 export function AppSidebar() {
   const [location] = useLocation();
@@ -59,15 +60,17 @@ export function AppSidebar() {
   ];
 
   return (
-    <Sidebar>
-      <SidebarHeader className="p-4 border-b border-sidebar-border">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-            <Zap className="w-5 h-5 text-primary-foreground" />
+    <Sidebar className="border-r border-border/50">
+      <SidebarHeader className="p-4 border-b border-sidebar-border/50 bg-gradient-to-br from-primary/5 to-primary/0">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
+            <Zap className="w-6 h-6 text-primary-foreground fill-primary-foreground" />
           </div>
           <div>
-            <h1 className="font-bold text-lg text-sidebar-foreground">DanTask</h1>
-            <p className="text-xs text-muted-foreground">Smart Task Manager</p>
+            <h1 className="font-bold text-xl text-sidebar-foreground bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              Daniyal To-Do
+            </h1>
+            <p className="text-xs text-muted-foreground font-medium">Smart Task Manager</p>
           </div>
         </div>
       </SidebarHeader>
@@ -99,7 +102,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="p-4 border-t border-sidebar-border">
+      <SidebarFooter className="p-4 border-t border-sidebar-border space-y-2">
+        <PWAInstall />
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild data-active={location === "/settings"} className="data-[active=true]:bg-sidebar-accent">

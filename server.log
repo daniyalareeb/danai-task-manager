@@ -1,0 +1,150 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+📦 Using PostgreSQL database storage
+10:39:15 PM [express] serving on port 5000
+[AI] generateSchedule called with 6 tasks, 4 availability slots
+[AI] Found 3 active tasks with duration
+OpenRouter API error with deepseek/deepseek-chat:free: {"error":{"message":"No endpoints found for deepseek/deepseek-chat:free.","code":404},"user_id":"user_2ygbkLp6vklDSAg7F80SKXnNatz"}
+OpenRouter API error with google/gemini-2.0-flash-exp:free: {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"google/gemini-2.0-flash-exp:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Google"}},"user_id":"user_2ygbkLp6vklDSAg7F80SKXnNatz"}
+Browserslist: browsers data (caniuse-lite) is 12 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+10:39:33 PM [express] GET /api/tasks 200 in 352ms :: [{"id":"b437ddff-c4c3-489b-8b76-e479bc445de3","t…
+[GET] Returning 4 availability slots
+10:40:22 PM [express] GET /api/availability 200 in 2124ms :: [{"id":"84c40be0-68a6-4151-993d-2cbc772c…
+[GET] Returning 4 availability slots
+10:40:22 PM [express] GET /api/availability 200 in 248ms :: [{"id":"84c40be0-68a6-4151-993d-2cbc772cb…
+10:40:27 PM [express] POST /api/availability 201 in 255ms :: {"id":"f15116bd-8715-443f-a4a0-e67cbb619…
+[GET] Returning 5 availability slots
+10:40:28 PM [express] GET /api/availability 200 in 346ms :: [{"id":"84c40be0-68a6-4151-993d-2cbc772cb…
+[GET] Returning 5 availability slots
+10:40:28 PM [express] GET /api/availability 200 in 233ms :: [{"id":"84c40be0-68a6-4151-993d-2cbc772cb…
+OpenRouter API error with deepseek/deepseek-chat:free: {"error":{"message":"No endpoints found for deepseek/deepseek-chat:free.","code":404},"user_id":"user_2ygbkLp6vklDSAg7F80SKXnNatz"}
+OpenRouter API error with google/gemini-2.0-flash-exp:free: {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"google/gemini-2.0-flash-exp:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Google"}},"user_id":"user_2ygbkLp6vklDSAg7F80SKXnNatz"}
+[AI] generateSchedule called with 6 tasks, 5 availability slots
+[AI] Found 3 active tasks with duration
+OpenRouter API error with deepseek/deepseek-chat:free: {"error":{"message":"No endpoints found for deepseek/deepseek-chat:free.","code":404},"user_id":"user_2ygbkLp6vklDSAg7F80SKXnNatz"}
+OpenRouter API error with google/gemini-2.0-flash-exp:free: {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"google/gemini-2.0-flash-exp:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"Google"}},"user_id":"user_2ygbkLp6vklDSAg7F80SKXnNatz"}
+Error generating schedule: SyntaxError: Expected ',' or ']' after array element in JSON at position 1285
+    at JSON.parse (<anonymous>)
+    at generateSchedule (/home/daniyalareeb/MyProjects/AreebTaskWizard/server/ai.ts:250:35)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/daniyalareeb/MyProjects/AreebTaskWizard/server/routes.ts:172:32)
+[AI] Falling back to simple scheduling
+[AI] Fallback: Scheduling 3 tasks
+[AI] Scheduling task Urgent: Fix production bug on 2025-10-29T09:00:00.000Z to 2025-10-29T11:00:00.000Z
+[AI] Scheduling task Prepare presentation for client meeting on 2025-10-28T09:00:00.000Z to 2025-10-28T12:00:00.000Z
+[AI] Scheduling task Review code for pull request on 2025-10-28T09:00:00.000Z to 2025-10-28T10:00:00.000Z
+[AI] Fallback generated 3 scheduled tasks
+10:41:12 PM [express] POST /api/schedule/generate 200 in 106405ms :: {"schedule":[{"taskId":"3b3555fb…
+[GET] Returning 5 availability slots
+10:41:12 PM [express] GET /api/availability 200 in 10148ms :: [{"id":"84c40be0-68a6-4151-993d-2cbc772…
+10:41:30 PM [express] POST /api/tasks/prioritize 200 in 59328ms :: {"prioritizedTasks":[{"taskId":"fa…
+10:41:31 PM [express] GET /api/tasks 200 in 102ms :: [{"id":"b437ddff-c4c3-489b-8b76-e479bc445de3","t…
+10:41:31 PM [express] GET /api/tasks 304 in 242ms :: [{"id":"b437ddff-c4c3-489b-8b76-e479bc445de3","t…
+10:41:31 PM [express] PATCH /api/tasks/fa374dcc-2491-4c98-bb00-73da584943d0 200 in 1056ms :: {"id":"f…
+10:41:31 PM [express] GET /api/tasks 200 in 297ms :: [{"id":"b437ddff-c4c3-489b-8b76-e479bc445de3","t…
+10:41:33 PM [express] PATCH /api/tasks/3b3555fb-038a-4e48-9961-34b6333bd101 200 in 105ms :: {"id":"3b…
+10:41:33 PM [express] GET /api/tasks 200 in 105ms :: [{"id":"b437ddff-c4c3-489b-8b76-e479bc445de3","t…
+10:41:35 PM [express] PATCH /api/tasks/90f5193d-cc2c-4949-a7aa-5c5de860ef0b 200 in 349ms :: {"id":"90…
+10:41:35 PM [express] GET /api/tasks 200 in 110ms :: [{"id":"90f5193d-cc2c-4949-a7aa-5c5de860ef0b","t…
+10:41:37 PM [express] PATCH /api/tasks/60d9140a-4926-4aaa-8930-a27a4558de64 200 in 146ms :: {"id":"60…
+10:41:37 PM [express] GET /api/tasks 200 in 104ms :: [{"id":"90f5193d-cc2c-4949-a7aa-5c5de860ef0b","t…
+10:41:40 PM [express] PATCH /api/tasks/cbc4b722-f374-4ab5-b265-136789b28623 200 in 132ms :: {"id":"cb…
+10:41:40 PM [express] GET /api/tasks 200 in 105ms :: [{"id":"90f5193d-cc2c-4949-a7aa-5c5de860ef0b","t…
+[GET] Returning 5 availability slots
+10:41:46 PM [express] GET /api/availability 200 in 124ms :: [{"id":"84c40be0-68a6-4151-993d-2cbc772cb…
+[DELETE] Deleting availability 84c40be0-68a6-4151-993d-2cbc772cb644
+[DB Storage] Attempting to delete availability 84c40be0-68a6-4151-993d-2cbc772cb644
+[DB Storage] Delete result: 1 row(s) deleted
+[DELETE] Result: true
+[DELETE] Remaining availability slots: 4
+10:41:50 PM [express] DELETE /api/availability/84c40be0-68a6-4151-993d-2cbc772cb644 204 in 570ms
+[GET] Returning 4 availability slots
+10:41:50 PM [express] GET /api/availability 200 in 107ms :: [{"id":"bae40b97-8700-4a38-8cce-fb78d6f7e…
+[GET] Returning 4 availability slots
+10:41:50 PM [express] GET /api/availability 200 in 110ms :: [{"id":"bae40b97-8700-4a38-8cce-fb78d6f7e…
+[DELETE] Deleting availability bae40b97-8700-4a38-8cce-fb78d6f7e96c
+[DB Storage] Attempting to delete availability bae40b97-8700-4a38-8cce-fb78d6f7e96c
+[DELETE] Deleting availability aff9dffb-0ef5-470d-a6ef-da631d02deee
+[DB Storage] Attempting to delete availability aff9dffb-0ef5-470d-a6ef-da631d02deee
+[DELETE] Deleting availability 09e85dd8-e056-463e-b354-9a8691b73249
+[DB Storage] Attempting to delete availability 09e85dd8-e056-463e-b354-9a8691b73249
+[DELETE] Deleting availability f15116bd-8715-443f-a4a0-e67cbb6199bf
+[DB Storage] Attempting to delete availability f15116bd-8715-443f-a4a0-e67cbb6199bf
+[DB Storage] Delete result: 1 row(s) deleted
+[DELETE] Result: true
+[DELETE] Remaining availability slots: 3
+10:41:53 PM [express] DELETE /api/availability/bae40b97-8700-4a38-8cce-fb78d6f7e96c 204 in 498ms
+[DB Storage] Delete result: 1 row(s) deleted
+[DELETE] Result: true
+[DB Storage] Delete result: 1 row(s) deleted
+[DELETE] Result: true
+[DB Storage] Delete result: 1 row(s) deleted
+[DELETE] Result: true
+[DELETE] Remaining availability slots: 0
+10:41:54 PM [express] DELETE /api/availability/f15116bd-8715-443f-a4a0-e67cbb6199bf 204 in 1805ms
+[DELETE] Remaining availability slots: 0
+10:41:54 PM [express] DELETE /api/availability/aff9dffb-0ef5-470d-a6ef-da631d02deee 204 in 1813ms
+[DELETE] Remaining availability slots: 0
+10:41:54 PM [express] DELETE /api/availability/09e85dd8-e056-463e-b354-9a8691b73249 204 in 1816ms
+[GET] Returning 0 availability slots
+10:41:55 PM [express] GET /api/availability 200 in 206ms :: []
+[GET] Returning 0 availability slots
+10:41:55 PM [express] GET /api/availability 200 in 106ms :: []
+Error generating schedule: SyntaxError: Expected ',' or ']' after array element in JSON at position 3149
+    at JSON.parse (<anonymous>)
+    at generateSchedule (/home/daniyalareeb/MyProjects/AreebTaskWizard/server/ai.ts:250:35)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/daniyalareeb/MyProjects/AreebTaskWizard/server/routes.ts:172:32)
+[AI] Falling back to simple scheduling
+[AI] Fallback: Scheduling 3 tasks
+[AI] Scheduling task Urgent: Fix production bug on 2025-10-29T09:00:00.000Z to 2025-10-29T11:00:00.000Z
+[AI] Scheduling task Prepare presentation for client meeting on 2025-10-28T09:00:00.000Z to 2025-10-28T12:00:00.000Z
+[AI] Scheduling task Review code for pull request on 2025-10-28T09:00:00.000Z to 2025-10-28T10:00:00.000Z
+[AI] Fallback generated 3 scheduled tasks
+10:44:15 PM [express] POST /api/schedule/generate 200 in 214394ms :: {"schedule":[{"taskId":"3b3555fb…
+10:44:15 PM [express] GET /api/tasks 200 in 291ms :: [{"id":"60d9140a-4926-4aaa-8930-a27a4558de64","t…
+22:46:10 [vite] hmr update /src/pages/scheduler-enhanced.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+[GET] Returning 0 availability slots
+10:46:11 PM [express] GET /api/availability 200 in 681ms :: []
+22:46:16 [vite] hmr update /src/pages/scheduler-enhanced.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+[GET] Returning 0 availability slots
+10:46:17 PM [express] GET /api/availability 200 in 284ms :: []
+22:48:41 [vite] hmr update /src/index.css?v=45XiAC6icxrYa376DSuak
+22:48:52 [vite] hmr update /src/pages/dashboard.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+[GET] Returning 0 availability slots
+10:49:03 PM [express] GET /api/availability 200 in 2001ms :: []
+22:49:04 [vite] hmr update /src/pages/tasks.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+22:49:25 [vite] hmr update /src/pages/tasks.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+22:49:45 [vite] hmr update /src/pages/scheduler-enhanced.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+22:49:53 [vite] hmr update /src/pages/scheduler-enhanced.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+22:50:17 [vite] hmr update /src/pages/scheduler-enhanced.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+22:50:36 [vite] hmr update /src/pages/scheduler-enhanced.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+[GET] Returning 0 availability slots
+10:50:44 PM [express] GET /api/availability 200 in 1862ms :: []
+22:51:00 [vite] hmr update /src/pages/scheduler-enhanced.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+22:51:25 [vite] hmr update /src/pages/scheduler-enhanced.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+22:51:46 [vite] hmr update /src/index.css?v=45XiAC6icxrYa376DSuak
+22:51:46 [vite] hmr update /src/pages/dashboard.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+22:51:46 [vite] hmr update /src/pages/tasks.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+22:51:47 [vite] hmr update /src/pages/scheduler-enhanced.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+10:52:31 PM [express] GET /api/tasks 304 in 1242ms :: [{"id":"60d9140a-4926-4aaa-8930-a27a4558de64","…
+[GET] Returning 0 availability slots
+10:52:44 PM [express] GET /api/availability 200 in 2695ms :: []
+[GET] Returning 0 availability slots
+10:52:44 PM [express] GET /api/availability 200 in 261ms :: []
+22:55:43 [vite] hmr update /src/components/app-sidebar.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+22:55:57 [vite] page reload index.html
+10:56:00 PM [express] GET /api/tasks 304 in 760ms :: [{"id":"60d9140a-4926-4aaa-8930-a27a4558de64","t…
+22:57:01 [vite] page reload src/main.tsx
+10:57:03 PM [express] GET /api/tasks 304 in 725ms :: [{"id":"60d9140a-4926-4aaa-8930-a27a4558de64","t…
+22:57:14 [vite] hmr update /src/components/app-sidebar.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+22:57:31 [vite] hmr update /src/components/app-sidebar.tsx, /src/index.css?v=45XiAC6icxrYa376DSuak
+22:58:20 [vite] hmr update /src/index.css?v=45XiAC6icxrYa376DSuak
+10:58:56 PM [express] GET /api/tasks 304 in 672ms :: [{"id":"60d9140a-4926-4aaa-8930-a27a4558de64","t…
+23:00:02 [vite] hmr update /src/index.css?v=45XiAC6icxrYa376DSuak

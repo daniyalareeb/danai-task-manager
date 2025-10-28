@@ -1,5 +1,6 @@
 import { type Task, type InsertTask, type Availability, type InsertAvailability } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { PostgresStorage } from "./db-storage";
 
 export interface IStorage {
   // Task operations
@@ -13,6 +14,7 @@ export interface IStorage {
   getAllAvailability(): Promise<Availability[]>;
   getAvailability(id: string): Promise<Availability | undefined>;
   createAvailability(availability: InsertAvailability): Promise<Availability>;
+  updateAvailability(id: string, updates: Partial<Availability>): Promise<Availability | undefined>;
   deleteAvailability(id: string): Promise<boolean>;
 }
 
@@ -89,9 +91,34 @@ export class MemStorage implements IStorage {
     return availability;
   }
 
+  async updateAvailability(id: string, updates: Partial<Availability>): Promise<Availability | undefined> {
+    const availability = this.availability.get(id);
+    if (!availability) return undefined;
+
+    const updatedAvailability: Availability = {
+      ...availability,
+      ...updates,
+    };
+    this.availability.set(id, updatedAvailability);
+    return updatedAvailability;
+  }
+
   async deleteAvailability(id: string): Promise<boolean> {
-    return this.availability.delete(id);
+    console.log(`[MemStorage] Attempting to delete availability ${id}`);
+    const deleted = this.availability.delete(id);
+    console.log(`[MemStorage] Delete result: ${deleted}, remaining: ${this.availability.size}`);
+    return deleted;
   }
 }
 
-export const storage = new MemStorage();
+// Choose storage implementation based on environment
+const DATABASE_URL = process.env.DATABASE_URL;
+
+export const storage = DATABASE_URL ? new PostgresStorage() : new MemStorage();
+
+// Log which storage is being used
+if (DATABASE_URL) {
+  console.log("📦 Using PostgreSQL database storage");
+} else {
+  console.log("💾 Using in-memory storage (data will reset on restart)");
+}

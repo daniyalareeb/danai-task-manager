@@ -95,7 +95,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Availability routes
   app.get("/api/availability", async (_req, res) => {
     try {
+      // Prevent caching
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
       const availability = await storage.getAllAvailability();
+      console.log(`[GET] Returning ${availability.length} availability slots`);
       res.json(availability);
     } catch (error) {
       console.error("Error fetching availability:", error);
@@ -114,6 +120,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error("Error creating availability:", error);
       res.status(500).json({ error: "Failed to create availability" });
+    }
+  });
+
+  app.put("/api/availability/:id", async (req, res) => {
+    try {
+      const availability = await storage.updateAvailability(req.params.id, req.body);
+      if (!availability) {
+        return res.status(404).json({ error: "Availability not found" });
+      }
+      res.json(availability);
+    } catch (error) {
+      console.error("Error updating availability:", error);
+      res.status(500).json({ error: "Failed to update availability" });
+    }
+  });
+
+  app.delete("/api/availability/:id", async (req, res) => {
+    try {
+      console.log(`[DELETE] Deleting availability ${req.params.id}`);
+      const deleted = await storage.deleteAvailability(req.params.id);
+      console.log(`[DELETE] Result: ${deleted}`);
+      
+      // Get remaining availability count
+      const remaining = await storage.getAllAvailability();
+      console.log(`[DELETE] Remaining availability slots: ${remaining.length}`);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: "Availability not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting availability:", error);
+      res.status(500).json({ error: "Failed to delete availability" });
     }
   });
 

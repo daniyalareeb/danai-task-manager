@@ -89,33 +89,39 @@ export default function Tasks() {
   }
 
   return (
-    <div className="space-y-6" data-testid="page-tasks">
-      <div className="flex justify-between items-center flex-wrap gap-4">
+    <div className="space-y-6 page-transition" data-testid="page-tasks">
+      <div className="flex justify-between items-center flex-wrap gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">All Tasks</h1>
-          <p className="text-muted-foreground mt-1">Manage and organize your tasks</p>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+            All Tasks
+          </h1>
+          <p className="text-muted-foreground mt-2 text-lg">Manage and organize your tasks</p>
         </div>
         <Link href="/tasks/new">
-          <Button data-testid="button-new-task">
+          <Button 
+            size="lg"
+            className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300"
+            data-testid="button-new-task"
+          >
             <Plus className="h-5 w-5 mr-2" />
             New Task
           </Button>
         </Link>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="relative flex-1 group">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
           <Input
             placeholder="Search tasks..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-12 rounded-xl border-2 focus:border-primary transition-all"
             data-testid="input-search-tasks"
           />
         </div>
         <Select value={filterPriority} onValueChange={setFilterPriority}>
-          <SelectTrigger className="w-full md:w-40" data-testid="select-filter-priority">
+          <SelectTrigger className="w-full md:w-40 h-12 rounded-xl border-2" data-testid="select-filter-priority">
             <Filter className="h-4 w-4 mr-2" />
             <SelectValue placeholder="Priority" />
           </SelectTrigger>
@@ -128,7 +134,7 @@ export default function Tasks() {
           </SelectContent>
         </Select>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-full md:w-40" data-testid="select-filter-status">
+          <SelectTrigger className="w-full md:w-40 h-12 rounded-xl border-2" data-testid="select-filter-status">
             <Filter className="h-4 w-4 mr-2" />
             <SelectValue placeholder="Status" />
           </SelectTrigger>
