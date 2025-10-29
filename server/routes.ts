@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { prioritizeTasks, generateSchedule } from "./ai";
-import { insertTaskSchema, insertAvailabilitySchema } from "@shared/schema";
+import { insertTaskSchema, insertAvailabilitySchema, updateTaskSchema, updateAvailabilitySchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -46,12 +46,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/tasks/:id", async (req, res) => {
     try {
-      const task = await storage.updateTask(req.params.id, req.body);
+      // Validate partial update data
+      const validatedData = updateTaskSchema.parse(req.body);
+      const task = await storage.updateTask(req.params.id, validatedData);
       if (!task) {
         return res.status(404).json({ error: "Task not found" });
       }
       res.json(task);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid task update data", details: error.errors });
+      }
       console.error("Error updating task:", error);
       res.status(500).json({ error: "Failed to update task" });
     }
@@ -125,12 +130,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/availability/:id", async (req, res) => {
     try {
-      const availability = await storage.updateAvailability(req.params.id, req.body);
+      // Validate partial update data
+      const validatedData = updateAvailabilitySchema.parse(req.body);
+      const availability = await storage.updateAvailability(req.params.id, validatedData);
       if (!availability) {
         return res.status(404).json({ error: "Availability not found" });
       }
       res.json(availability);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid availability update data", details: error.errors });
+      }
       console.error("Error updating availability:", error);
       res.status(500).json({ error: "Failed to update availability" });
     }

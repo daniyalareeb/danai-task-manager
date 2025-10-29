@@ -57,10 +57,34 @@ export const insertAvailabilitySchema = createInsertSchema(availability).omit({
   endTime: z.string().optional(),
 });
 
+// Partial update schemas for PATCH routes
+export const updateTaskSchema = z.object({
+  title: z.string().min(1).optional(),
+  description: z.string().optional(),
+  priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
+  status: z.enum(["pending", "scheduled", "in-progress", "completed"]).optional(),
+  estimatedDuration: z.number().min(1).optional(),
+  deadline: z.string().optional().transform(val => val ? new Date(val) : undefined),
+  scheduledStart: z.string().optional().transform(val => val ? new Date(val) : undefined),
+  scheduledEnd: z.string().optional().transform(val => val ? new Date(val) : undefined),
+  completed: z.boolean().optional(),
+  aiPriority: z.number().optional(),
+  aiReasoning: z.string().optional(),
+}).strict(); // Reject unknown fields
+
+export const updateAvailabilitySchema = z.object({
+  date: z.string().transform(val => new Date(val)).optional(),
+  availableHours: z.number().min(1).max(24).optional(),
+  startTime: z.string().optional(),
+  endTime: z.string().optional(),
+}).strict(); // Reject unknown fields
+
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type Task = typeof tasks.$inferSelect;
 export type InsertAvailability = z.infer<typeof insertAvailabilitySchema>;
 export type Availability = typeof availability.$inferSelect;
+export type UpdateTask = z.infer<typeof updateTaskSchema>;
+export type UpdateAvailability = z.infer<typeof updateAvailabilitySchema>;
 
 // AI Request/Response types
 export interface PrioritizeTasksRequest {
