@@ -27,6 +27,20 @@ export default function Scheduled() {
     },
   });
 
+  const archiveMutation = useMutation({
+    mutationFn: async (taskId: string) => {
+      return apiRequest("PATCH", `/api/tasks/${taskId}/archive`);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/tasks"] });
+      toast({
+        title: "Task archived",
+        description: "Task has been archived successfully.",
+      });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (taskId: string) => {
       return apiRequest("DELETE", `/api/tasks/${taskId}`, undefined);
@@ -110,6 +124,7 @@ export default function Scheduled() {
                         toggleCompleteMutation.mutate({ taskId, completed })
                       }
                       onDelete={(taskId) => deleteMutation.mutate(taskId)}
+                      onArchive={(taskId) => archiveMutation.mutate(taskId)}
                       showAiInsights={true}
                     />
                   ))}

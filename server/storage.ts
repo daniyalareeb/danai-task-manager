@@ -1,14 +1,16 @@
-import { type Task, type InsertTask, type Availability, type InsertAvailability } from "@shared/schema";
+import { type Task, type InsertTask, type Availability, type InsertAvailability, type TaskTemplate, type InsertTaskTemplate } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { PostgresStorage } from "./db-storage";
 
 export interface IStorage {
   // Task operations
-  getAllTasks(): Promise<Task[]>;
+  getAllTasks(includeArchived?: boolean): Promise<Task[]>;
   getTask(id: string): Promise<Task | undefined>;
   createTask(task: InsertTask): Promise<Task>;
   updateTask(id: string, updates: Partial<Task>): Promise<Task | undefined>;
   deleteTask(id: string): Promise<boolean>;
+  archiveTask(id: string): Promise<Task | undefined>;
+  unarchiveTask(id: string): Promise<Task | undefined>;
 
   // Availability operations
   getAllAvailability(): Promise<Availability[]>;
@@ -16,6 +18,12 @@ export interface IStorage {
   createAvailability(availability: InsertAvailability): Promise<Availability>;
   updateAvailability(id: string, updates: Partial<Availability>): Promise<Availability | undefined>;
   deleteAvailability(id: string): Promise<boolean>;
+
+  // Template operations
+  getTaskTemplates(): Promise<TaskTemplate[]>;
+  getTaskTemplate(id: string): Promise<TaskTemplate | undefined>;
+  createTaskTemplate(template: InsertTaskTemplate): Promise<TaskTemplate>;
+  deleteTaskTemplate(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -28,8 +36,12 @@ export class MemStorage implements IStorage {
   }
 
   // Task operations
-  async getAllTasks(): Promise<Task[]> {
-    return Array.from(this.tasks.values());
+  async getAllTasks(includeArchived: boolean = false): Promise<Task[]> {
+    const allTasks = Array.from(this.tasks.values());
+    if (includeArchived) {
+      return allTasks;
+    }
+    return allTasks.filter(task => !task.archived);
   }
 
   async getTask(id: string): Promise<Task | undefined> {
@@ -47,6 +59,13 @@ export class MemStorage implements IStorage {
       completedAt: insertTask.completed ? now : null,
       aiPriority: null,
       aiReasoning: null,
+      recurringPattern: insertTask.recurringPattern ?? null,
+      parentTaskId: insertTask.parentTaskId ?? null,
+      nextRecurrenceDate: insertTask.nextRecurrenceDate ?? null,
+      actualDuration: insertTask.actualDuration ?? null,
+      archived: insertTask.archived ?? false,
+      category: insertTask.category ?? null,
+      tags: insertTask.tags ?? null,
     };
     this.tasks.set(id, task);
     return task;
@@ -67,6 +86,22 @@ export class MemStorage implements IStorage {
 
   async deleteTask(id: string): Promise<boolean> {
     return this.tasks.delete(id);
+  }
+
+  async archiveTask(id: string): Promise<Task | undefined> {
+    const task = this.tasks.get(id);
+    if (!task) return undefined;
+    const archivedTask: Task = { ...task, archived: true };
+    this.tasks.set(id, archivedTask);
+    return archivedTask;
+  }
+
+  async unarchiveTask(id: string): Promise<Task | undefined> {
+    const task = this.tasks.get(id);
+    if (!task) return undefined;
+    const unarchivedTask: Task = { ...task, archived: false };
+    this.tasks.set(id, unarchivedTask);
+    return unarchivedTask;
   }
 
   // Availability operations
@@ -108,6 +143,34 @@ export class MemStorage implements IStorage {
     const deleted = this.availability.delete(id);
     console.log(`[MemStorage] Delete result: ${deleted}, remaining: ${this.availability.size}`);
     return deleted;
+  }
+
+  // Template operations
+  private templates: Map<string, TaskTemplate> = new Map();
+
+  async getTaskTemplates(): Promise<TaskTemplate[]> {
+    return Array.from(this.templates.values());
+  }
+
+  async getTaskTemplate(id: string): Promise<TaskTemplate | undefined> {
+    return this.templates.get(id);
+  }
+
+  async createTaskTemplate(template: InsertTaskTemplate): Promise<TaskTemplate> {
+    const id = randomUUID();
+    const taskTemplate: TaskTemplate = {
+      ...template,
+      id,
+      description: template.description ?? null,
+      category: template.category ?? null,
+      createdAt: new Date(),
+    };
+    this.templates.set(id, taskTemplate);
+    return taskTemplate;
+  }
+
+  async deleteTaskTemplate(id: string): Promise<boolean> {
+    return this.templates.delete(id);
   }
 }
 

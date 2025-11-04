@@ -1,6 +1,6 @@
-import { type Task, type InsertTask, type Availability, type InsertAvailability } from "@shared/schema";
-import { tasks, availability } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { type Task, type InsertTask, type Availability, type InsertAvailability, type TaskTemplate, type InsertTaskTemplate } from "@shared/schema";
+import { tasks, availability, taskTemplates } from "@shared/schema";
+import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import { IStorage } from "./storage";
@@ -17,10 +17,13 @@ const db = pool ? drizzle(pool) : null;
 
 export class PostgresStorage implements IStorage {
   // Task operations
-  async getAllTasks(): Promise<Task[]> {
+  async getAllTasks(includeArchived: boolean = false): Promise<Task[]> {
     if (!db) return [];
     const result = await db.select().from(tasks);
-    return result as Task[];
+    if (includeArchived) {
+      return result as Task[];
+    }
+    return result.filter(task => !task.archived) as Task[];
   }
 
   async getTask(id: string): Promise<Task | undefined> {
@@ -49,6 +52,26 @@ export class PostgresStorage implements IStorage {
     if (!db) return false;
     const result = await db.delete(tasks).where(eq(tasks.id, id)).returning();
     return result.length > 0;
+  }
+
+  async archiveTask(id: string): Promise<Task | undefined> {
+    if (!db) return undefined;
+    const result = await db
+      .update(tasks)
+      .set({ archived: true })
+      .where(eq(tasks.id, id))
+      .returning();
+    return result[0] as Task | undefined;
+  }
+
+  async unarchiveTask(id: string): Promise<Task | undefined> {
+    if (!db) return undefined;
+    const result = await db
+      .update(tasks)
+      .set({ archived: false })
+      .where(eq(tasks.id, id))
+      .returning();
+    return result[0] as Task | undefined;
   }
 
   // Availability operations
@@ -88,6 +111,31 @@ export class PostgresStorage implements IStorage {
     console.log(`[DB Storage] Attempting to delete availability ${id}`);
     const result = await db.delete(availability).where(eq(availability.id, id)).returning();
     console.log(`[DB Storage] Delete result: ${result.length} row(s) deleted`);
+    return result.length > 0;
+  }
+
+  // Template operations
+  async getTaskTemplates(): Promise<TaskTemplate[]> {
+    if (!db) return [];
+    const result = await db.select().from(taskTemplates);
+    return result as TaskTemplate[];
+  }
+
+  async getTaskTemplate(id: string): Promise<TaskTemplate | undefined> {
+    if (!db) return undefined;
+    const result = await db.select().from(taskTemplates).where(eq(taskTemplates.id, id)).limit(1);
+    return result[0] as TaskTemplate | undefined;
+  }
+
+  async createTaskTemplate(template: InsertTaskTemplate): Promise<TaskTemplate> {
+    if (!db) throw new Error("Database not configured");
+    const result = await db.insert(taskTemplates).values(template).returning();
+    return result[0] as TaskTemplate;
+  }
+
+  async deleteTaskTemplate(id: string): Promise<boolean> {
+    if (!db) return false;
+    const result = await db.delete(taskTemplates).where(eq(taskTemplates.id, id)).returning();
     return result.length > 0;
   }
 }

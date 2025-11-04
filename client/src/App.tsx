@@ -1,7 +1,7 @@
 import { Switch, Route, useLocation } from "wouter";
 import { useEffect } from "react";
 import { App as CapacitorApp } from "@capacitor/app";
-import { queryClient } from "./lib/queryClient";
+import { queryClient, apiRequest } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,12 +10,15 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useNotifications } from "@/hooks/use-notifications";
+import { useToast } from "@/hooks/use-toast";
 import Dashboard from "@/pages/dashboard";
 import Tasks from "@/pages/tasks";
 import NewTask from "@/pages/new-task";
 import Scheduler from "@/pages/scheduler-enhanced";
 import Scheduled from "@/pages/scheduled";
 import Completed from "@/pages/completed";
+import Templates from "@/pages/templates";
+import Archived from "@/pages/archived";
 import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 import { QuickAdd } from "@/components/quick-add";
@@ -25,10 +28,12 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/tasks" component={Tasks} />
-      <Route path="/tasks/new" component={NewTask} />
+      <Route path="/new-task" component={NewTask} />
       <Route path="/scheduler" component={Scheduler} />
       <Route path="/scheduled" component={Scheduled} />
       <Route path="/completed" component={Completed} />
+      <Route path="/templates" component={Templates} />
+      <Route path="/archived" component={Archived} />
       <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>
@@ -39,6 +44,49 @@ function AppContent() {
   useNotifications();
   const [location, setLocation] = useLocation();
   const { openMobile, setOpenMobile, isMobile } = useSidebar();
+  const { toast } = useToast();
+
+  // Automatic daily carryover on app startup
+  useEffect(() => {
+    const runAutoCarryover = async () => {
+      try {
+        // Check if we already ran carryover today
+        const lastRunDate = localStorage.getItem("dantask-last-carryover-date");
+        const today = new Date().toDateString();
+        
+        if (lastRunDate === today) {
+          // Already ran today, skip
+          return;
+        }
+
+        // Wait a bit for API to be ready (especially after server sleep)
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        const response = await apiRequest("POST", "/api/tasks/auto-carryover", {});
+        const data = response as { carryoverCount: number; message: string };
+        
+        // Mark as run today
+        localStorage.setItem("dantask-last-carryover-date", today);
+
+        // Show toast if tasks were carried over
+        if (data.carryoverCount > 0) {
+          toast({
+            title: "Tasks Rescheduled",
+            description: data.message,
+            duration: 5000,
+          });
+          
+          // Refetch tasks to show updated schedule
+          await queryClient.refetchQueries({ queryKey: ["/api/tasks"] });
+        }
+      } catch (error) {
+        console.warn("Auto-carryover failed (server may be sleeping):", error);
+        // Don't show error to user - this is a background operation
+      }
+    };
+
+    runAutoCarryover();
+  }, []); // Run once on app startup
 
   // Handle Android back button
   useEffect(() => {

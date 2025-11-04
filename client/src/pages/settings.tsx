@@ -2,18 +2,40 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Moon, Sun, Sparkles } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Bell, Moon, Sun, Sparkles, MoonStar } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { notificationService } from "@/lib/notifications";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
+  const [dndStartHour, setDndStartHour] = useState<string>("23");
+  const [dndEndHour, setDndEndHour] = useState<string>("8");
+
+  // Load do not disturb settings from localStorage
+  useEffect(() => {
+    const savedDndStart = localStorage.getItem("dantask-dnd-start");
+    const savedDndEnd = localStorage.getItem("dantask-dnd-time");
+    if (savedDndStart) {
+      setDndStartHour(savedDndStart);
+    }
+    if (savedDndEnd) {
+      setDndEndHour(savedDndEnd);
+    }
+  }, []);
 
   useEffect(() => {
     // Check notification permission status
@@ -119,6 +141,60 @@ export default function Settings() {
                 Enable
               </Button>
             )}
+          </div>
+
+          <div className="space-y-4 pt-4 border-t">
+            <div className="space-y-2">
+              <Label htmlFor="dnd-start">Do Not Disturb Start Time</Label>
+              <p className="text-sm text-muted-foreground">
+                No notifications will be sent after this time until the end time
+              </p>
+              <Select value={dndStartHour} onValueChange={(value) => {
+                setDndStartHour(value);
+                localStorage.setItem("dantask-dnd-start", value);
+                toast({
+                  title: "Setting saved",
+                  description: "Do not disturb time updated.",
+                });
+              }}>
+                <SelectTrigger id="dnd-start" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 24 }, (_, i) => (
+                    <SelectItem key={i} value={i.toString()}>
+                      {i === 0 ? "12:00 AM (Midnight)" : i < 12 ? `${i}:00 AM` : i === 12 ? "12:00 PM (Noon)" : `${i - 12}:00 PM`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="dnd-end">Do Not Disturb End Time</Label>
+              <p className="text-sm text-muted-foreground">
+                Notifications will resume after this time in the morning
+              </p>
+              <Select value={dndEndHour} onValueChange={(value) => {
+                setDndEndHour(value);
+                notificationService.setDoNotDisturbEnd(parseInt(value, 10));
+                toast({
+                  title: "Setting saved",
+                  description: "Do not disturb end time updated.",
+                });
+              }}>
+                <SelectTrigger id="dnd-end" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <SelectItem key={i} value={i.toString()}>
+                      {i === 0 ? "12:00 AM (Midnight)" : `${i}:00 AM`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>

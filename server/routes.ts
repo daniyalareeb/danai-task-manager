@@ -16,7 +16,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { prioritizeTasks, generateSchedule } from "./ai";
-import { insertTaskSchema, insertAvailabilitySchema, updateTaskSchema, updateAvailabilitySchema } from "@shared/schema";
+import { insertTaskSchema, insertAvailabilitySchema, updateTaskSchema, updateAvailabilitySchema, insertTaskTemplateSchema } from "@shared/schema";
 import { z } from "zod";
 
 /**
@@ -26,9 +26,10 @@ import { z } from "zod";
  */
 export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes
-  app.get("/api/tasks", async (_req, res) => {
+  app.get("/api/tasks", async (req, res) => {
     try {
-      const tasks = await storage.getAllTasks();
+      const includeArchived = req.query.archived === "true";
+      const tasks = await storage.getAllTasks(includeArchived);
       res.json(tasks);
     } catch (error) {
       console.error("Error fetching tasks:", error);
@@ -71,6 +72,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!task) {
         return res.status(404).json({ error: "Task not found" });
       }
+
+      // Check if task was just completed and has recurring pattern
+      if (validatedData.completed === true && task.recurringPattern && !task.parentTaskId) {
+        // Calculate next occurrence date
+        const now = new Date();
+        let nextDate = new Date();
+        
+        if (task.recurringPattern === "daily") {
+          nextDate.setDate(now.getDate() + 1);
+        } else if (task.recurringPattern === "weekly") {
+          nextDate.setDate(now.getDate() + 7);
+        } else if (task.recurringPattern === "monthly") {
+          nextDate.setMonth(now.getMonth() + 1);
+        }
+
+        // Create new task instance
+        const newTask = await storage.createTask({
+          title: task.title,
+          description: task.description ?? undefined,
+          priority: task.priority as "low" | "medium" | "high" | "urgent",
+          status: "pending",
+          estimatedDuration: task.estimatedDuration ?? undefined,
+          deadline: task.deadline ? new Date(task.deadline).toISOString() : undefined,
+          completed: false,
+          recurringPattern: task.recurringPattern,
+          parentTaskId: task.id,
+          nextRecurrenceDate: nextDate.toISOString(),
+          category: task.category ?? undefined,
+          tags: task.tags ?? undefined,
+        });
+
+        console.log(`[Recurring] Created new instance for recurring task "${task.title}"`);
+      }
+
       res.json(task);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -78,6 +113,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error("Error updating task:", error);
       res.status(500).json({ error: "Failed to update task" });
+    }
+  });
+
+  // Archive/Unarchive endpoints
+  app.patch("/api/tasks/:id/archive", async (req, res) => {
+    try {
+      const task = await storage.archiveTask(req.params.id);
+      if (!task) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+      res.json(task);
+    } catch (error) {
+      console.error("Error archiving task:", error);
+      res.status(500).json({ error: "Failed to archive task" });
+    }
+  });
+
+  app.patch("/api/tasks/:id/unarchive", async (req, res) => {
+    try {
+      const task = await storage.unarchiveTask(req.params.id);
+      if (!task) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+      res.json(task);
+    } catch (error) {
+      console.error("Error unarchiving task:", error);
+      res.status(500).json({ error: "Failed to unarchive task" });
+    }
+  });
+
+  // Timer endpoint
+  app.patch("/api/tasks/:id/timer", async (req, res) => {
+    try {
+      const { action, minutes } = req.body; // action: "start" | "stop" | "update", minutes: number
+      const task = await storage.getTask(req.params.id);
+      if (!task) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+
+      let actualDuration = task.actualDuration ?? 0;
+      if (action === "update" && typeof minutes === "number") {
+        actualDuration = minutes;
+      } else if (action === "stop" && typeof minutes === "number") {
+        actualDuration = (task.actualDuration ?? 0) + minutes;
+      }
+
+      const updatedTask = await storage.updateTask(req.params.id, { actualDuration });
+      res.json(updatedTask);
+    } catch (error) {
+      console.error("Error updating timer:", error);
+      res.status(500).json({ error: "Failed to update timer" });
     }
   });
 
@@ -182,6 +268,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting availability:", error);
       res.status(500).json({ error: "Failed to delete availability" });
+    }
+  });
+
+  // Template routes
+  app.get("/api/templates", async (_req, res) => {
+    try {
+      const templates = await storage.getTaskTemplates();
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching templates:", error);
+      res.status(500).json({ error: "Failed to fetch templates" });
+    }
+  });
+
+  app.post("/api/templates", async (req, res) => {
+    try {
+      const validatedData = insertTaskTemplateSchema.parse(req.body);
+      const template = await storage.createTaskTemplate(validatedData);
+      res.status(201).json(template);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid template data", details: error.errors });
+      }
+      console.error("Error creating template:", error);
+      res.status(500).json({ error: "Failed to create template" });
+    }
+  });
+
+  app.delete("/api/templates/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deleteTaskTemplate(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Template not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting template:", error);
+      res.status(500).json({ error: "Failed to delete template" });
+    }
+  });
+
+  // Create task from template
+  app.post("/api/tasks/from-template/:templateId", async (req, res) => {
+    try {
+      const template = await storage.getTaskTemplate(req.params.templateId);
+      if (!template) {
+        return res.status(404).json({ error: "Template not found" });
+      }
+
+      const task = await storage.createTask({
+        title: template.title,
+        description: template.description ?? undefined,
+        priority: template.priority as "low" | "medium" | "high" | "urgent",
+        status: "pending",
+        estimatedDuration: template.estimatedDuration ?? undefined,
+        category: template.category ?? undefined,
+        completed: false,
+      });
+
+      res.status(201).json(task);
+    } catch (error) {
+      console.error("Error creating task from template:", error);
+      res.status(500).json({ error: "Failed to create task from template" });
+    }
+  });
+
+  // Automatic daily carryover
+  app.post("/api/tasks/auto-carryover", async (_req, res) => {
+    try {
+      const tasks = await storage.getAllTasks();
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      let carryoverCount = 0;
+
+      for (const task of tasks) {
+        if (!task.completed && !task.archived && task.scheduledStart) {
+          const scheduledTime = new Date(task.scheduledStart);
+          const scheduledDate = new Date(scheduledTime.getFullYear(), scheduledTime.getMonth(), scheduledTime.getDate());
+          
+          // Check if task is scheduled for today or a past date
+          if (scheduledDate.getTime() <= today.getTime()) {
+            // Check if scheduled time has passed (more than 1 hour ago)
+            if (scheduledTime.getTime() < now.getTime() - 3600000) {
+              // Reschedule for tomorrow (same time)
+              const tomorrow = new Date(scheduledTime);
+              tomorrow.setDate(tomorrow.getDate() + 1);
+              
+              // Calculate new end time if scheduledEnd exists
+              let newEndTime: Date | null = null;
+              if (task.scheduledEnd) {
+                const originalEnd = new Date(task.scheduledEnd);
+                const duration = originalEnd.getTime() - scheduledTime.getTime();
+                newEndTime = new Date(tomorrow.getTime() + duration);
+              }
+
+              await storage.updateTask(task.id, {
+                scheduledStart: tomorrow,
+                scheduledEnd: newEndTime,
+                status: "scheduled",
+              });
+
+              carryoverCount++;
+              console.log(`[Auto-Carryover] Rescheduled task "${task.title}" from ${scheduledTime.toISOString()} to ${tomorrow.toISOString()}`);
+            }
+          }
+        }
+      }
+
+      res.json({
+        carryoverCount,
+        message: carryoverCount > 0 
+          ? `${carryoverCount} task${carryoverCount > 1 ? 's' : ''} automatically rescheduled for tomorrow`
+          : "No tasks needed carryover",
+      });
+    } catch (error) {
+      console.error("Error in auto-carryover:", error);
+      res.status(500).json({ error: "Failed to perform auto-carryover" });
     }
   });
 

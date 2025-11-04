@@ -23,6 +23,10 @@ export default function Tasks() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterPriority, setFilterPriority] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("active");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [filterTags, setFilterTags] = useState<string>("");
+  const [showArchived, setShowArchived] = useState<boolean>(false);
+  const [filterRecurring, setFilterRecurring] = useState<string>("all");
 
   const { data: tasks = [], isLoading } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
@@ -42,6 +46,20 @@ export default function Tasks() {
     },
   });
 
+  const archiveMutation = useMutation({
+    mutationFn: async (taskId: string) => {
+      return apiRequest("PATCH", `/api/tasks/${taskId}/archive`);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/tasks"] });
+      toast({
+        title: "Task archived",
+        description: "Task has been archived successfully.",
+      });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (taskId: string) => {
       return apiRequest("DELETE", `/api/tasks/${taskId}`, undefined);
@@ -56,9 +74,13 @@ export default function Tasks() {
     },
   });
 
+  // Get unique categories from tasks
+  const categories = Array.from(new Set(tasks.map(t => t.category).filter(Boolean))) as string[];
+
   const filteredTasks = tasks.filter((task) => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (task.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+      (task.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+      (task.tags?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
     
     const matchesPriority = filterPriority === "all" || task.priority === filterPriority;
     
@@ -66,7 +88,17 @@ export default function Tasks() {
       (filterStatus === "active" && !task.completed) ||
       (filterStatus === "completed" && task.completed);
 
-    return matchesSearch && matchesPriority && matchesStatus;
+    const matchesCategory = filterCategory === "all" || task.category === filterCategory;
+
+    const matchesTags = !filterTags || (task.tags?.toLowerCase().includes(filterTags.toLowerCase()) ?? false);
+
+    const matchesArchived = showArchived ? task.archived : !task.archived;
+
+    const matchesRecurring = filterRecurring === "all" ||
+      (filterRecurring === "recurring" && !!task.recurringPattern) ||
+      (filterRecurring === "non-recurring" && !task.recurringPattern);
+
+    return matchesSearch && matchesPriority && matchesStatus && matchesCategory && matchesTags && matchesArchived && matchesRecurring;
   });
 
   if (isLoading) {
@@ -149,6 +181,45 @@ export default function Tasks() {
             <SelectItem value="completed">Completed</SelectItem>
           </SelectContent>
         </Select>
+        {categories.length > 0 && (
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-full md:w-40 h-12 rounded-xl border-2">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <Input
+          placeholder="Filter by tags..."
+          value={filterTags}
+          onChange={(e) => setFilterTags(e.target.value)}
+          className="h-12 rounded-xl border-2"
+        />
+        <Select value={filterRecurring} onValueChange={setFilterRecurring}>
+          <SelectTrigger className="w-full md:w-40 h-12 rounded-xl border-2">
+            <SelectValue placeholder="Recurring" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Tasks</SelectItem>
+            <SelectItem value="recurring">Recurring</SelectItem>
+            <SelectItem value="non-recurring">Non-Recurring</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
+          variant={showArchived ? "default" : "outline"}
+          onClick={() => setShowArchived(!showArchived)}
+          className="h-12"
+        >
+          {showArchived ? "Hide Archived" : "Show Archived"}
+        </Button>
       </div>
 
       {filteredTasks.length === 0 ? (
@@ -165,6 +236,7 @@ export default function Tasks() {
                 toggleCompleteMutation.mutate({ taskId, completed })
               }
               onDelete={(taskId) => deleteMutation.mutate(taskId)}
+              onArchive={(taskId) => archiveMutation.mutate(taskId)}
               onEdit={(task) => setLocation(`/tasks/${task.id}/edit`)}
             />
           ))}

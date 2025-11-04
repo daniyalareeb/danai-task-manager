@@ -35,28 +35,58 @@ export function useNotifications() {
   }, [permissionRequested]);
 
   useEffect(() => {
-    // Only schedule reminders if we have permission
-    if (typeof window === "undefined" || !("Notification" in window) || !window.Notification || window.Notification.permission !== "granted") {
-      return;
-    }
+    // Check permission status (both browser and Capacitor)
+    const checkAndSchedule = async () => {
+      // Check if we have permission (browser or Capacitor)
+      const isCapacitor = typeof window !== "undefined" && !!window.Capacitor;
+      let hasPermission = false;
 
-    // Schedule reminders for all active scheduled tasks
-    const activeTasks = tasks.filter(t => !t.completed && t.scheduledStart);
-    
-    activeTasks.forEach(task => {
-      notificationService.scheduleTaskReminder(task);
-    });
+      if (isCapacitor) {
+        // Check Capacitor permission
+        try {
+          const { LocalNotifications } = await import("@capacitor/local-notifications");
+          const result = await LocalNotifications.checkPermissions();
+          hasPermission = result.display === "granted";
+        } catch (error) {
+          console.warn("Failed to check Capacitor notification permissions:", error);
+        }
+      } else if (typeof window !== "undefined" && "Notification" in window && window.Notification) {
+        hasPermission = window.Notification.permission === "granted";
+      }
 
-    // Check for upcoming deadlines
-    const tasksWithDeadlines = tasks.filter(t => !t.completed && t.deadline);
-    tasksWithDeadlines.forEach(task => {
-      notificationService.notifyTaskDueSoon(task);
-    });
+      if (!hasPermission) {
+        return; // No permission, skip scheduling
+      }
 
-    // Cleanup completed tasks' reminders
-    const completedTasks = tasks.filter(t => t.completed);
-    completedTasks.forEach(task => {
-      notificationService.clearTaskReminder(task.id);
+      // Update persistent reminders for all tasks
+      // This will reschedule reminders for incomplete tasks (handles app reopen scenario)
+      // and stop them for completed tasks
+      for (const task of tasks) {
+        await notificationService.updatePersistentReminders(task);
+      }
+
+      // Schedule initial reminders for all active scheduled tasks
+      const activeTasks = tasks.filter(t => !t.completed && t.scheduledStart);
+      
+      for (const task of activeTasks) {
+        await notificationService.scheduleTaskReminder(task);
+      }
+
+      // Check for upcoming deadlines (multiple reminders at 1h, 30m, 5m before deadline)
+      const tasksWithDeadlines = tasks.filter(t => !t.completed && t.deadline);
+      for (const task of tasksWithDeadlines) {
+        await notificationService.notifyTaskDueSoon(task);
+      }
+
+      // Cleanup completed tasks' reminders
+      const completedTasks = tasks.filter(t => t.completed);
+      for (const task of completedTasks) {
+        await notificationService.clearTaskReminder(task.id);
+      }
+    };
+
+    checkAndSchedule().catch(error => {
+      console.warn("Error scheduling notifications:", error);
     });
 
     // Cleanup

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Sparkles, Trash2, Edit, MoreVertical } from "lucide-react";
+import { Calendar, Clock, Sparkles, Trash2, Edit, MoreVertical, Archive, Repeat } from "lucide-react";
 import { format } from "date-fns";
 import {
   DropdownMenu,
@@ -11,12 +11,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { TaskTimer } from "./task-timer";
 
 interface TaskCardProps {
   task: Task;
   onToggleComplete: (taskId: string, completed: boolean) => void;
   onDelete: (taskId: string) => void;
   onEdit?: (task: Task) => void;
+  onArchive?: (taskId: string) => void;
   showAiInsights?: boolean;
 }
 
@@ -34,7 +36,7 @@ const priorityLabels = {
   urgent: "Urgent",
 };
 
-export function TaskCard({ task, onToggleComplete, onDelete, onEdit, showAiInsights = false }: TaskCardProps) {
+export function TaskCard({ task, onToggleComplete, onDelete, onEdit, onArchive, showAiInsights = false }: TaskCardProps) {
   const isCompleted = task.completed;
   const isOverdue = task.deadline && new Date(task.deadline) < new Date() && !isCompleted;
   
@@ -55,6 +57,9 @@ export function TaskCard({ task, onToggleComplete, onDelete, onEdit, showAiInsig
     return deadline.toDateString() === today.toDateString();
   })();
 
+  // Parse tags from comma-separated string
+  const tags = task.tags ? task.tags.split(",").map(t => t.trim()).filter(Boolean) : [];
+
   return (
     <Card className={`hover:shadow-xl hover:scale-[1.01] transition-all duration-300 bg-card border-border/50 w-full max-w-full overflow-x-hidden hover-elevate active-elevate-2 ${isCompleted ? "opacity-60" : ""} ${isOverdue ? "border-destructive/50 ring-2 ring-destructive/20" : ""} ${borderColor} ${task.priority === "urgent" && !isCompleted ? "hover:ring-2 hover:ring-destructive/30" : ""}`} data-testid={`card-task-${task.id}`}>
       <CardHeader className="flex flex-row items-start gap-mobile-md md:gap-4 space-y-0 pb-3 p-mobile-md md:p-6">
@@ -69,7 +74,18 @@ export function TaskCard({ task, onToggleComplete, onDelete, onEdit, showAiInsig
             <h3 className={`font-semibold text-mobile-base md:text-base text-foreground ${isCompleted ? "line-through" : ""}`} data-testid={`text-task-title-${task.id}`}>
               {task.title}
             </h3>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              {task.category && (
+                <Badge variant="outline" className="text-mobile-xs md:text-xs">
+                  {task.category}
+                </Badge>
+              )}
+              {task.recurringPattern && (
+                <Badge variant="outline" className="text-mobile-xs md:text-xs flex items-center gap-1">
+                  <Repeat className="h-3 w-3" />
+                  {task.recurringPattern}
+                </Badge>
+              )}
               <Badge className={`${priorityColors[task.priority as keyof typeof priorityColors]} text-mobile-xs md:text-xs px-2 py-0.5`}>
                 {priorityLabels[task.priority as keyof typeof priorityLabels]}
               </Badge>
@@ -96,6 +112,16 @@ export function TaskCard({ task, onToggleComplete, onDelete, onEdit, showAiInsig
                       Edit
                     </DropdownMenuItem>
                   )}
+                  {onArchive && !task.archived && (
+                    <DropdownMenuItem
+                      onClick={() => onArchive(task.id)}
+                      className="min-h-[44px]"
+                      data-testid={`button-archive-task-${task.id}`}
+                    >
+                      <Archive className="h-4 w-4 mr-2" />
+                      Archive
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem
                     onClick={() => onDelete(task.id)}
                     className="text-destructive min-h-[44px]"
@@ -116,26 +142,47 @@ export function TaskCard({ task, onToggleComplete, onDelete, onEdit, showAiInsig
         </div>
       </CardHeader>
       <CardContent className="pt-0 pl-11 md:pl-14 p-mobile-md md:p-6 pb-mobile-md md:pb-6">
-        <div className="flex flex-wrap gap-2 md:gap-3 text-mobile-xs md:text-sm">
-          {task.estimatedDuration && (
-            <div className="flex items-center gap-1 text-orange-500 dark:text-orange-400 font-medium" data-testid={`text-task-duration-${task.id}`}>
-              <Clock className="h-3 w-3 md:h-4 md:w-4" />
-              <span>{task.estimatedDuration}h</span>
+        <div className="space-y-3">
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {tags.map((tag, index) => (
+                <Badge key={index} variant="secondary" className="text-mobile-xs md:text-xs px-2 py-0.5">
+                  {tag}
+                </Badge>
+              ))}
             </div>
           )}
-          {task.deadline && (
-            <div className={`flex items-center gap-1 ${isOverdue ? "text-destructive" : "text-muted-foreground"}`} data-testid={`text-task-deadline-${task.id}`}>
-              <Calendar className="h-3 w-3 md:h-4 md:w-4" />
-              <span>{format(new Date(task.deadline), "MMM d, yyyy")}</span>
-            </div>
-          )}
-          {task.scheduledStart && (
-            <div className="flex items-center gap-1 text-blue-500 dark:text-blue-400 font-medium" data-testid={`text-task-scheduled-${task.id}`}>
-              <Calendar className="h-3 w-3 md:h-4 md:w-4" />
-              <span>
-                {format(new Date(task.scheduledStart), "MMM d, h:mm a")}
-                {task.scheduledEnd && ` - ${format(new Date(task.scheduledEnd), "h:mm a")}`}
-              </span>
+          <div className="flex flex-wrap gap-2 md:gap-3 text-mobile-xs md:text-sm">
+            {task.estimatedDuration && (
+              <div className="flex items-center gap-1 text-orange-500 dark:text-orange-400 font-medium" data-testid={`text-task-duration-${task.id}`}>
+                <Clock className="h-3 w-3 md:h-4 md:w-4" />
+                <span>{task.estimatedDuration}h</span>
+              </div>
+            )}
+            {task.actualDuration && task.actualDuration > 0 && (
+              <div className="flex items-center gap-1 text-muted-foreground text-mobile-xs md:text-sm">
+                <span>Actual: {Math.floor(task.actualDuration / 60)}h {task.actualDuration % 60}m</span>
+              </div>
+            )}
+            {task.deadline && (
+              <div className={`flex items-center gap-1 ${isOverdue ? "text-destructive" : "text-muted-foreground"}`} data-testid={`text-task-deadline-${task.id}`}>
+                <Calendar className="h-3 w-3 md:h-4 md:w-4" />
+                <span>{format(new Date(task.deadline), "MMM d, yyyy")}</span>
+              </div>
+            )}
+            {task.scheduledStart && (
+              <div className="flex items-center gap-1 text-blue-500 dark:text-blue-400 font-medium" data-testid={`text-task-scheduled-${task.id}`}>
+                <Calendar className="h-3 w-3 md:h-4 md:w-4" />
+                <span>
+                  {format(new Date(task.scheduledStart), "MMM d, h:mm a")}
+                  {task.scheduledEnd && ` - ${format(new Date(task.scheduledEnd), "h:mm a")}`}
+                </span>
+              </div>
+            )}
+          </div>
+          {!isCompleted && (
+            <div className="pt-2">
+              <TaskTimer task={task} />
             </div>
           )}
         </div>
