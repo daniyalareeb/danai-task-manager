@@ -170,21 +170,40 @@ export async function generateSchedule(
     return { schedule: [] };
   }
 
-  const activeTasks = tasks.filter(t => !t.completed && t.estimatedDuration);
-  console.log(`[AI] Found ${activeTasks.length} active tasks with duration`);
+  // Filter for active tasks with duration
+  // After clearing old schedules in routes.ts, we reschedule all incomplete tasks
+  // This includes: unscheduled tasks, and tasks that had their old schedules cleared (carryover)
+  const activeTasks = tasks.filter(t => {
+    if (t.completed || !t.estimatedDuration) return false;
+    
+    // Include all incomplete tasks with duration
+    // Tasks with passed scheduled times will have been cleared in routes.ts before this is called
+    // Tasks scheduled in the future can also be rescheduled if user wants to reorganize
+    return true;
+  });
+  
+  console.log(`[AI] Found ${activeTasks.length} active tasks with duration (including carryover tasks)`);
   
   if (activeTasks.length === 0) {
     console.log("[AI] No active tasks with duration - returning empty schedule");
     return { schedule: [] };
   }
 
-  // Sort tasks by priority (AI priority first, then user priority, then deadline)
+  // Sort tasks by priority (carryover tasks first, then AI priority, then user priority, then deadline)
   const sortedTasks = [...activeTasks].sort((a, b) => {
-    // First by AI priority (if available)
+    const now = new Date();
+    
+    // First priority: Tasks with passed scheduled times (carryover) get highest priority
+    const aIsCarryover = a.scheduledStart && new Date(a.scheduledStart).getTime() < now.getTime() - 3600000;
+    const bIsCarryover = b.scheduledStart && new Date(b.scheduledStart).getTime() < now.getTime() - 3600000;
+    if (aIsCarryover && !bIsCarryover) return -1; // a comes first
+    if (!aIsCarryover && bIsCarryover) return 1;  // b comes first
+    
+    // Second priority: AI priority (if available)
     if (a.aiPriority && b.aiPriority) {
       if (a.aiPriority !== b.aiPriority) return a.aiPriority - b.aiPriority;
     }
-    // Then by user-set priority
+    // Third priority: User-set priority
     const priorityOrder: { [key: string]: number } = { urgent: 1, high: 2, medium: 3, low: 4 };
     const aPriority = priorityOrder[a.priority];
     const bPriority = priorityOrder[b.priority];

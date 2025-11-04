@@ -62,12 +62,19 @@ export default function Scheduler() {
       await queryClient.refetchQueries({ queryKey: ["/api/tasks"] });
       
       const scheduledCount = data?.schedule?.length || 0;
+      const carryoverCount = data?.carryoverCount || 0;
       
       // Show detailed success message with schedule info
       if (scheduledCount > 0) {
+        let description = `AI scheduled ${scheduledCount} task${scheduledCount > 1 ? 's' : ''} into your available time slots.`;
+        if (carryoverCount > 0) {
+          description += ` ${carryoverCount} incomplete task${carryoverCount > 1 ? 's were' : ' was'} automatically rescheduled from previous dates.`;
+        }
+        description += " Check your calendar!";
+        
         toast({
           title: "✅ Schedule Generated!",
-          description: `AI scheduled ${scheduledCount} task${scheduledCount > 1 ? 's' : ''} into your available time slots. Check your calendar!`,
+          description,
         });
         
         // Send notification for each scheduled task

@@ -190,6 +190,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const tasks = await storage.getAllTasks();
       const availability = await storage.getAllAvailability();
+      
+      // Clear scheduled times for incomplete tasks whose scheduled time has passed (carryover)
+      const now = new Date();
+      let carryoverCount = 0;
+      for (const task of tasks) {
+        if (!task.completed && task.scheduledStart) {
+          const scheduledTime = new Date(task.scheduledStart);
+          // If scheduled time has passed (more than 1 hour ago), clear the schedule
+          if (scheduledTime.getTime() < now.getTime() - 3600000) { // 1 hour buffer
+            await storage.updateTask(task.id, {
+              scheduledStart: null,
+              scheduledEnd: null,
+              status: "pending", // Reset to pending so it can be rescheduled
+            });
+            carryoverCount++;
+            console.log(`[Schedule] Cleared old schedule for task "${task.title}" (carryover)`);
+          }
+        }
+      }
 
       const mappedAvailability = availability.map(a => ({
         date: a.date,
@@ -198,9 +217,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         endTime: a.endTime ?? undefined,
       }));
 
-      const scheduleResponse = await generateSchedule(tasks, mappedAvailability);
+      // Get updated tasks after clearing carryover
+      const updatedTasksForSchedule = await storage.getAllTasks();
+      const scheduleResponse = await generateSchedule(updatedTasksForSchedule, mappedAvailability);
 
-      // Update tasks with schedule
+      // Update tasks with new schedule
       for (const scheduleItem of scheduleResponse.schedule) {
         await storage.updateTask(scheduleItem.taskId, {
           scheduledStart: new Date(scheduleItem.scheduledStart),
@@ -210,7 +231,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const updatedTasks = await storage.getAllTasks();
-      res.json({ schedule: scheduleResponse.schedule, tasks: updatedTasks });
+      res.json({ 
+        schedule: scheduleResponse.schedule, 
+        tasks: updatedTasks,
+        carryoverCount, // Include count of tasks that were carried over
+      });
     } catch (error) {
       console.error("Error generating schedule:", error);
       res.status(500).json({ error: "Failed to generate schedule" });

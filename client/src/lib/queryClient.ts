@@ -124,11 +124,10 @@ function getApiBaseUrl(): string {
       return config.server.url;
     }
     
-    // If not in config, use the development server URL
-    // This should match your computer's IP address and port
-    // Update this if your network setup changes
-    // For production, this should point to your Render deployment URL
-    return 'http://192.168.1.243:5000';
+    // If not in config, use the production Render deployment URL
+    // For local development, uncomment the line below and use your local IP
+    // return 'http://192.168.1.243:5000';
+    return 'https://danai-task-manager.onrender.com';
   }
   
   // For web browser, use relative URLs (will use current origin)
