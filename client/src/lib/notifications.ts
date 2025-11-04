@@ -1,11 +1,16 @@
 import { Task } from "@shared/schema";
+import { LocalNotifications } from "@capacitor/local-notifications";
 
 export class NotificationService {
   private static instance: NotificationService;
   private permissionGranted: boolean = false;
   private notificationIntervals: Map<string, NodeJS.Timeout> = new Map();
+  private localNotificationIds: Map<string, number> = new Map();
+  private nextNotificationId: number = 1;
+  private isCapacitor: boolean = false;
 
   private constructor() {
+    this.isCapacitor = typeof window !== "undefined" && !!window.Capacitor;
     this.checkPermission();
   }
 
@@ -17,45 +22,116 @@ export class NotificationService {
   }
 
   private async checkPermission() {
-    if ("Notification" in window) {
-      this.permissionGranted = Notification.permission === "granted";
+    if (this.isCapacitor) {
+      // Check Capacitor local notifications permission
+      try {
+        const result = await LocalNotifications.checkPermissions();
+        this.permissionGranted = result.display === "granted";
+      } catch (error) {
+        console.warn("Failed to check Capacitor notification permissions:", error);
+        this.permissionGranted = false;
+      }
+    } else if (typeof window !== "undefined" && "Notification" in window && window.Notification) {
+      this.permissionGranted = window.Notification.permission === "granted";
     }
   }
 
   async requestPermission(): Promise<boolean> {
-    if (!("Notification" in window)) {
-      console.warn("This browser does not support notifications");
+    if (this.isCapacitor) {
+      try {
+        const result = await LocalNotifications.requestPermissions();
+        this.permissionGranted = result.display === "granted";
+        return this.permissionGranted;
+      } catch (error) {
+        console.warn("Failed to request Capacitor notification permission:", error);
+        return false;
+      }
+    }
+
+    if (typeof window === "undefined" || !("Notification" in window) || !window.Notification) {
+      console.warn("Notification API not available");
       return false;
     }
 
-    const permission = await Notification.requestPermission();
-    this.permissionGranted = permission === "granted";
-    return this.permissionGranted;
+    try {
+      const permission = await window.Notification.requestPermission();
+      this.permissionGranted = permission === "granted";
+      return this.permissionGranted;
+    } catch (error) {
+      console.warn("Failed to request notification permission:", error);
+      return false;
+    }
   }
 
   showNotification(title: string, options?: NotificationOptions) {
+    if (this.isCapacitor) {
+      // Use Capacitor Local Notifications
+      this.scheduleLocalNotification(title, options?.body || "", options?.requireInteraction || false);
+      return;
+    }
+
+    if (typeof window === "undefined" || !("Notification" in window) || !window.Notification) {
+      console.warn("Notification API not available");
+      return;
+    }
+
     if (!this.permissionGranted) {
       console.warn("Notification permission not granted");
       return;
     }
 
-    const notification = new Notification(title, {
-      icon: "/favicon.png",
-      badge: "/favicon.png",
-      ...options,
-    });
+    try {
+      const notification = new window.Notification(title, {
+        icon: "/favicon.png",
+        badge: "/favicon.png",
+        ...options,
+      });
 
-    notification.onclick = () => {
-      window.focus();
-      notification.close();
-    };
+      notification.onclick = () => {
+        if (typeof window !== "undefined" && window.focus) {
+          window.focus();
+        }
+        notification.close();
+      };
 
-    // Auto-close notification after 5 seconds (unless requireInteraction)
-    if (!options?.requireInteraction) {
-      setTimeout(() => notification.close(), 5000);
+      // Auto-close notification after 5 seconds (unless requireInteraction)
+      if (!options?.requireInteraction) {
+        setTimeout(() => notification.close(), 5000);
+      }
+
+      return notification;
+    } catch (error) {
+      console.warn("Failed to show notification:", error);
+      return undefined;
+    }
+  }
+
+  private async scheduleLocalNotification(title: string, body: string, requireInteraction: boolean) {
+    if (!this.isCapacitor || !this.permissionGranted) {
+      return;
     }
 
-    return notification;
+    try {
+      const notificationId = this.nextNotificationId++;
+      await LocalNotifications.schedule({
+        notifications: [
+          {
+            title,
+            body,
+            id: notificationId,
+            schedule: { at: new Date(Date.now() + 100) }, // Schedule immediately
+            sound: "default",
+            attachments: [],
+            actionTypeId: "",
+            extra: null,
+          },
+        ],
+      });
+      return notificationId;
+    } catch (error) {
+      console.warn("Failed to schedule local notification:", error);
+      return null;
+    }
   }
 
   scheduleTaskReminder(task: Task) {
@@ -72,21 +148,58 @@ export class NotificationService {
 
     // Schedule notification for when task should start
     if (timeUntilStart > 0) {
-      const timeout = setTimeout(() => {
-        this.showNotification(`Time to start: ${task.title}`, {
-          body: `This task is scheduled to begin now. Let's get it done!`,
-          tag: task.id,
-          requireInteraction: true,
-        });
+      if (this.isCapacitor && this.permissionGranted) {
+        // Use Capacitor Local Notifications for scheduled reminders
+        this.scheduleLocalNotificationForTask(task, scheduledTime);
+      } else {
+        // Use browser notifications (fallback)
+        const timeout = setTimeout(() => {
+          this.showNotification(`Time to start: ${task.title}`, {
+            body: `This task is scheduled to begin now. Let's get it done!`,
+            tag: task.id,
+            requireInteraction: true,
+          });
 
-        // Start persistent reminders every 15 minutes until completed
-        this.startPersistentReminders(task);
-      }, timeUntilStart);
+          // Start persistent reminders every 15 minutes until completed
+          this.startPersistentReminders(task);
+        }, timeUntilStart);
 
-      this.notificationIntervals.set(`schedule-${task.id}`, timeout);
+        this.notificationIntervals.set(`schedule-${task.id}`, timeout);
+      }
     } else {
       // Task time has passed, start reminders immediately
       this.startPersistentReminders(task);
+    }
+  }
+
+  private async scheduleLocalNotificationForTask(task: Task, scheduledTime: Date) {
+    if (!this.isCapacitor || !this.permissionGranted) {
+      return;
+    }
+
+    try {
+      const notificationId = this.nextNotificationId++;
+      this.localNotificationIds.set(`schedule-${task.id}`, notificationId);
+
+      await LocalNotifications.schedule({
+        notifications: [
+          {
+            title: `Time to start: ${task.title}`,
+            body: `This task is scheduled to begin now. Let's get it done!`,
+            id: notificationId,
+            schedule: { at: scheduledTime },
+            sound: "default",
+            attachments: [],
+            actionTypeId: "",
+            extra: {
+              taskId: task.id,
+              type: "task-start",
+            },
+          },
+        ],
+      });
+    } catch (error) {
+      console.warn("Failed to schedule local notification for task:", error);
     }
   }
 
@@ -127,6 +240,7 @@ export class NotificationService {
     const scheduleKey = `schedule-${taskId}`;
     const reminderKey = `reminder-${taskId}`;
 
+    // Clear browser notification timeouts/intervals
     const scheduleTimeout = this.notificationIntervals.get(scheduleKey);
     if (scheduleTimeout) {
       clearTimeout(scheduleTimeout);
@@ -137,6 +251,17 @@ export class NotificationService {
     if (reminderInterval) {
       clearInterval(reminderInterval);
       this.notificationIntervals.delete(reminderKey);
+    }
+
+    // Clear Capacitor local notifications
+    if (this.isCapacitor) {
+      const localNotificationId = this.localNotificationIds.get(scheduleKey);
+      if (localNotificationId) {
+        LocalNotifications.cancel({ notifications: [{ id: localNotificationId }] }).catch(
+          (error) => console.warn("Failed to cancel local notification:", error)
+        );
+        this.localNotificationIds.delete(scheduleKey);
+      }
     }
   }
 
@@ -159,14 +284,52 @@ export class NotificationService {
 
     if (hoursUntilDue > 0 && hoursUntilDue <= 24) {
       const urgency = hoursUntilDue <= 2 ? "URGENT" : hoursUntilDue <= 6 ? "High Priority" : "Reminder";
-      
-      this.showNotification(`${urgency}: ${task.title}`, {
-        body: hoursUntilDue <= 2 
-          ? `⚠️ Due in ${Math.round(hoursUntilDue * 60)} minutes! Did you complete this?`
-          : `Due in ${Math.round(hoursUntilDue)} hours. Have you started this task?`,
-        tag: `deadline-${task.id}`,
-        requireInteraction: true,
+      const body = hoursUntilDue <= 2 
+        ? `⚠️ Due in ${Math.round(hoursUntilDue * 60)} minutes! Did you complete this?`
+        : `Due in ${Math.round(hoursUntilDue)} hours. Have you started this task?`;
+
+      if (this.isCapacitor && this.permissionGranted) {
+        // Schedule local notification for deadline
+        this.scheduleLocalNotificationForDeadline(task, deadline, urgency, body);
+      } else {
+        // Use browser notifications
+        this.showNotification(`${urgency}: ${task.title}`, {
+          body,
+          tag: `deadline-${task.id}`,
+          requireInteraction: true,
+        });
+      }
+    }
+  }
+
+  private async scheduleLocalNotificationForDeadline(task: Task, deadline: Date, urgency: string, body: string) {
+    if (!this.isCapacitor || !this.permissionGranted) {
+      return;
+    }
+
+    try {
+      const notificationId = this.nextNotificationId++;
+      this.localNotificationIds.set(`deadline-${task.id}`, notificationId);
+
+      await LocalNotifications.schedule({
+        notifications: [
+          {
+            title: `${urgency}: ${task.title}`,
+            body,
+            id: notificationId,
+            schedule: { at: deadline },
+            sound: "default",
+            attachments: [],
+            actionTypeId: "",
+            extra: {
+              taskId: task.id,
+              type: "deadline",
+            },
+          },
+        ],
       });
+    } catch (error) {
+      console.warn("Failed to schedule local notification for deadline:", error);
     }
   }
 }

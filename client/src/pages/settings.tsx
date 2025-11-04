@@ -7,47 +7,74 @@ import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { notificationService } from "@/lib/notifications";
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    if ("Notification" in window) {
-      setNotificationsEnabled(Notification.permission === "granted");
-    }
+    // Check notification permission status
+    const checkPermission = async () => {
+      setIsChecking(true);
+      try {
+        // Use notificationService which handles both browser and Capacitor
+        const isCapacitor = typeof window !== "undefined" && window.Capacitor !== undefined;
+        
+        if (isCapacitor) {
+          // For Capacitor, check via LocalNotifications
+          const { LocalNotifications } = await import("@capacitor/local-notifications");
+          const result = await LocalNotifications.checkPermissions();
+          setNotificationsEnabled(result.display === "granted");
+        } else if (typeof window !== "undefined" && "Notification" in window && window.Notification) {
+          // For browser, check Notification API
+          setNotificationsEnabled(window.Notification.permission === "granted");
+        } else {
+          setNotificationsEnabled(false);
+        }
+      } catch (error) {
+        console.warn("Failed to check notification permission:", error);
+        setNotificationsEnabled(false);
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    checkPermission();
   }, []);
 
   const requestNotificationPermission = async () => {
-    if (!("Notification" in window)) {
-      toast({
-        title: "Not supported",
-        description: "Your browser doesn't support notifications.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const permission = await Notification.requestPermission();
-    if (permission === "granted") {
-      setNotificationsEnabled(true);
-      localStorage.setItem("dantask-notification-permission", "granted");
-      toast({
-        title: "Notifications enabled",
-        description: "You'll receive task reminders and updates.",
-      });
+    try {
+      const granted = await notificationService.requestPermission();
       
-      // Test notification
-      new Notification("DanTask Notifications Enabled", {
-        body: "You'll now receive smart reminders for your tasks!",
-        icon: "/favicon.png",
-      });
-    } else {
-      localStorage.setItem("dantask-notification-permission", "denied");
+      if (granted) {
+        setNotificationsEnabled(true);
+        localStorage.setItem("dantask-notification-permission", "granted");
+        toast({
+          title: "Notifications enabled",
+          description: "You'll receive task reminders and updates.",
+        });
+        
+        // Show test notification
+        notificationService.showNotification("DanTask Notifications Enabled", {
+          body: "You'll now receive smart reminders for your tasks!",
+        });
+      } else {
+        setNotificationsEnabled(false);
+        localStorage.setItem("dantask-notification-permission", "denied");
+        toast({
+          title: "Permission denied",
+          description: "You won't receive task notifications.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to request notification permission:", error);
       toast({
-        title: "Permission denied",
-        description: "You won't receive task notifications.",
+        title: "Error",
+        description: "Failed to enable notifications. Please try again.",
         variant: "destructive",
       });
     }
@@ -78,7 +105,9 @@ export default function Settings() {
                 Receive push notifications for task reminders
               </p>
             </div>
-            {notificationsEnabled ? (
+            {isChecking ? (
+              <Badge variant="secondary">Checking...</Badge>
+            ) : notificationsEnabled ? (
               <Badge variant="secondary">Enabled</Badge>
             ) : (
               <Button

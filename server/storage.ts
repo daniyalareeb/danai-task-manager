@@ -111,6 +111,17 @@ export class MemStorage implements IStorage {
   }
 }
 
+/**
+ * Storage Implementation Selection
+ * 
+ * Automatically chooses between:
+ * - PostgresStorage: Uses PostgreSQL database (production)
+ * - MemStorage: In-memory storage (development/fallback)
+ * 
+ * Selection is based on DATABASE_URL environment variable.
+ * If DATABASE_URL is not set, falls back to in-memory storage.
+ */
+
 // Choose storage implementation based on environment
 const DATABASE_URL = process.env.DATABASE_URL;
 
@@ -121,4 +132,5 @@ if (DATABASE_URL) {
   console.log("📦 Using PostgreSQL database storage");
 } else {
   console.log("💾 Using in-memory storage (data will reset on restart)");
+  console.warn("⚠️  Warning: Set DATABASE_URL for persistent storage");
 }

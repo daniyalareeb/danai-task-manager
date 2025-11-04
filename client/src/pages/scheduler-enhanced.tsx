@@ -15,24 +15,51 @@ import { CheckCircle2, AlertCircle } from "lucide-react";
 export default function Scheduler() {
   const { toast } = useToast();
 
-  const { data: tasks = [], isLoading: tasksLoading } = useQuery<Task[]>({
+  const { data: tasks = [], isLoading: tasksLoading, error: tasksError, refetch: refetchTasks } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
+    retry: 1,
+    retryDelay: 1000,
   });
 
-  const { data: availability = [], isLoading: availabilityLoading } = useQuery<Availability[]>({
+  const { data: availability = [], isLoading: availabilityLoading, error: availabilityError, refetch: refetchAvailability } = useQuery<Availability[]>({
     queryKey: ["/api/availability"],
     staleTime: 0,
     cacheTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
+    retry: 1,
+    retryDelay: 1000,
   });
 
   const generateScheduleMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("POST", "/api/schedule/generate", {});
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
+      try {
+        const response = await apiRequest("POST", "/api/schedule/generate", {});
+        clearTimeout(timeoutId);
+        return response;
+      } catch (error: any) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+          throw new Error('Request timed out. Server may be sleeping.');
+        }
+        throw error;
+      }
     },
-    onSuccess: (data: any) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+    onError: (error: any) => {
+      toast({
+        title: "Server Error",
+        description: error.message || "Server is sleeping. Please try again in a moment.",
+        variant: "destructive",
+      });
+    },
+    onSuccess: async (response: Response) => {
+      const data = await response.json();
+      await queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/tasks"] });
       
       const scheduledCount = data?.schedule?.length || 0;
       
@@ -56,9 +83,9 @@ export default function Scheduler() {
             });
             const taskTitle = tasks.find(t => t.id === item.taskId)?.title || 'Task';
             
-            // Show notification if browser notifications are available
-            if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification(`📅 Scheduled: ${taskTitle}`, {
+            // Use notification service instead of direct Notification API
+            if (typeof window !== "undefined" && "Notification" in window && window.Notification && window.Notification.permission === 'granted') {
+              new window.Notification(`📅 Scheduled: ${taskTitle}`, {
                 body: `⏰ ${startTime} - ${endTime}\n${item.reasoning || 'AI optimized this time slot for you!'}`,
                 icon: '/favicon.png'
               });
@@ -72,13 +99,6 @@ export default function Scheduler() {
           variant: "default",
         });
       }
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to generate schedule. Please try again.",
-        variant: "destructive",
-      });
     },
   });
 
@@ -109,6 +129,13 @@ export default function Scheduler() {
   const prioritizeTasksMutation = useMutation({
     mutationFn: async () => {
       return apiRequest("POST", "/api/tasks/prioritize", {});
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Server Error",
+        description: "Server is sleeping. Please try again in a moment.",
+        variant: "destructive",
+      });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
@@ -144,8 +171,11 @@ export default function Scheduler() {
     );
   }
 
+  const hasError = tasksError || availabilityError;
+  const errorMessage = hasError ? "Server is sleeping. Please try again in a moment." : "";
+
   return (
-    <div className="space-y-6 page-transition" data-testid="page-scheduler">
+    <div className="space-y-6 page-transition pb-20 md:pb-6" data-testid="page-scheduler">
       {/* Header */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-8 md:p-10 text-white shadow-2xl">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
@@ -186,9 +216,30 @@ export default function Scheduler() {
         </div>
       </div>
 
+      {/* Error Alert */}
+      {hasError && (
+        <Alert className="border-red-200 bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/20 dark:border-red-900 rounded-xl shadow-md hover:shadow-lg transition-shadow border-2">
+          <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+          <AlertDescription className="text-red-700 dark:text-red-300 font-medium flex items-center justify-between">
+            <span>{errorMessage}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (tasksError) refetchTasks();
+                if (availabilityError) refetchAvailability();
+              }}
+              className="ml-4 border-red-300 dark:border-red-700 hover:bg-red-100 dark:hover:bg-red-900/50"
+            >
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Status Alerts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
-        {activeTasks.length === 0 && (
+        {activeTasks.length === 0 && !hasError && (
           <Alert className="border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/20 dark:border-blue-900 rounded-xl shadow-md hover:shadow-lg transition-shadow border-2">
             <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             <AlertDescription className="text-blue-700 dark:text-blue-300 font-medium">
@@ -197,7 +248,7 @@ export default function Scheduler() {
           </Alert>
         )}
         
-        {availability.length === 0 && (
+        {availability.length === 0 && !hasError && (
           <Alert className="border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/20 dark:border-amber-900 rounded-xl shadow-md hover:shadow-lg transition-shadow border-2">
             <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             <AlertDescription className="text-amber-700 dark:text-amber-300 font-medium">
@@ -208,9 +259,9 @@ export default function Scheduler() {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-mobile-md md:gap-6">
         {/* Left Column - Calendar Availability */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-mobile-md md:space-y-6">
           <CalendarAvailability />
           
           {/* AI Schedule Actions */}
@@ -280,7 +331,7 @@ export default function Scheduler() {
         </div>
 
         {/* Right Column - Quick Stats & Schedule Preview */}
-        <div className="space-y-6">
+        <div className="space-y-mobile-md md:space-y-6">
           {/* Quick Stats */}
           <Card className="bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-950/20 dark:to-gray-950/20 border-slate-200 dark:border-slate-900 shadow-lg rounded-2xl">
             <CardHeader>
@@ -404,13 +455,13 @@ export default function Scheduler() {
                               )}
                               {task.scheduledStart && task.scheduledEnd && (
                                 <div className="flex items-center gap-3 text-sm">
-                                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-semibold">
+                                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold">
                                     <Clock className="h-4 w-4" />
                                     <span>
                                       {format(new Date(task.scheduledStart), "h:mm a")} - {format(new Date(task.scheduledEnd), "h:mm a")}
                                     </span>
                                   </div>
-                                  <Badge variant="secondary" className="font-bold">
+                                  <Badge className="font-bold bg-orange-500 dark:bg-orange-600 text-white">
                                     {task.estimatedDuration || 1}h
                                   </Badge>
                                 </div>

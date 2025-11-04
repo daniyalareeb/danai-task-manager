@@ -1,3 +1,19 @@
+/**
+ * Express Server Entry Point
+ * 
+ * This server provides:
+ * - REST API endpoints for task and availability management
+ * - Static file serving for the React frontend
+ * - Security middleware (CORS, rate limiting, headers)
+ * - Vite dev server integration in development
+ * 
+ * Environment Variables Required:
+ * - DATABASE_URL: PostgreSQL connection string
+ * - OPENROUTER_API_KEY: API key for AI scheduling
+ * - PORT: Server port (default: 5000)
+ * - NODE_ENV: Environment (development/production)
+ */
+
 import "dotenv/config"; // Load environment variables
 import express, { type Request, Response, NextFunction } from "express";
 import cors from "cors";
@@ -86,8 +102,13 @@ app.use((req, res, next) => {
   if (process.env.NODE_ENV === "production") {
     res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   }
-  // Content Security Policy (basic)
-  res.setHeader("Content-Security-Policy", "default-src 'self'");
+  // Content Security Policy (relaxed for development)
+  if (process.env.NODE_ENV === "production") {
+    res.setHeader("Content-Security-Policy", "default-src 'self'");
+  } else {
+    // Allow inline scripts and external resources in development
+    res.setHeader("Content-Security-Policy", "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: http: data: blob:;");
+  }
   next();
 });
 

@@ -12,11 +12,16 @@ export function useNotifications() {
   useEffect(() => {
     // Request notification permission on first load if not already done
     const requestPermission = async () => {
-      if (!permissionRequested && "Notification" in window) {
+      if (typeof window === "undefined" || !("Notification" in window) || !window.Notification) {
+        setPermissionRequested(true);
+        return;
+      }
+
+      if (!permissionRequested) {
         const hasStoredPreference = localStorage.getItem("dantask-notification-permission");
         
         // Only auto-request if user hasn't explicitly denied before
-        if (!hasStoredPreference && Notification.permission === "default") {
+        if (!hasStoredPreference && window.Notification.permission === "default") {
           const granted = await notificationService.requestPermission();
           localStorage.setItem("dantask-notification-permission", granted ? "granted" : "denied");
           setPermissionRequested(true);
@@ -31,7 +36,7 @@ export function useNotifications() {
 
   useEffect(() => {
     // Only schedule reminders if we have permission
-    if (Notification.permission !== "granted") {
+    if (typeof window === "undefined" || !("Notification" in window) || !window.Notification || window.Notification.permission !== "granted") {
       return;
     }
 

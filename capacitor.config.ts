@@ -4,12 +4,12 @@ const config: CapacitorConfig = {
   appId: 'com.daniyal.todo',
   appName: 'Daniyal To-Do',
   webDir: 'dist/public',
-  server: {
-    // Commented out for standalone APK - will use local files
-    // To use with deployed server, set URL here:
-    // url: 'https://your-app.onrender.com',
-    // cleartext: false
-  },
+  // Commented out for standalone APK - will use local bundled files
+  // Uncomment and set to your server URL only for development/live reload
+  // server: {
+  //   url: 'http://192.168.1.243:5000',
+  //   cleartext: true,
+  // },
   android: {
     allowMixedContent: true,
     buildOptions: {

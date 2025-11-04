@@ -57,22 +57,27 @@ export default function Completed() {
   }
 
   return (
-    <div className="space-y-6" data-testid="page-completed">
+    <div className="space-y-mobile-md md:space-y-6 w-full max-w-full overflow-x-hidden pb-20 md:pb-6" data-testid="page-completed">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Completed Tasks</h1>
-        <p className="text-muted-foreground mt-1">Review your accomplishments</p>
+        <h1 className="text-mobile-2xl md:text-3xl font-bold text-foreground">Completed Tasks</h1>
+        <p className="text-muted-foreground mt-1 text-mobile-sm md:text-base">Review your accomplishments</p>
       </div>
 
       {completedTasks.length === 0 ? (
-        <div className="text-center py-12">
-          <CheckCircle2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No completed tasks yet</h3>
-          <p className="text-muted-foreground">
+        <div className="flex flex-col items-center justify-center py-16 md:py-24 px-4">
+          <div className="relative mb-6">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-full blur-2xl"></div>
+            <div className="relative h-24 w-24 md:h-32 md:w-32 rounded-full bg-gradient-to-br from-green-500/10 to-emerald-500/5 border-2 border-green-500/20 flex items-center justify-center">
+              <CheckCircle2 className="h-12 w-12 md:h-16 md:w-16 text-green-500 dark:text-green-400 stroke-[1.5]" />
+            </div>
+          </div>
+          <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">No completed tasks yet</h3>
+          <p className="text-muted-foreground text-center max-w-md text-mobile-sm md:text-base">
             Complete some tasks to see them here.
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-mobile-md md:space-y-3">
           {completedTasks.map((task) => (
             <TaskCard
               key={task.id}

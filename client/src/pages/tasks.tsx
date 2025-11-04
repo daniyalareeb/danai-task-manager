@@ -32,8 +32,9 @@ export default function Tasks() {
     mutationFn: async ({ taskId, completed }: { taskId: string; completed: boolean }) => {
       return apiRequest("PATCH", `/api/tasks/${taskId}`, { completed });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/tasks"] });
       toast({
         title: "Task updated",
         description: "Task completion status updated successfully.",
@@ -45,8 +46,9 @@ export default function Tasks() {
     mutationFn: async (taskId: string) => {
       return apiRequest("DELETE", `/api/tasks/${taskId}`, undefined);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/tasks"] });
       toast({
         title: "Task deleted",
         description: "Task has been removed successfully.",
@@ -89,7 +91,7 @@ export default function Tasks() {
   }
 
   return (
-    <div className="space-y-6 page-transition" data-testid="page-tasks">
+    <div className="space-y-6 page-transition w-full max-w-full overflow-x-hidden pb-20 md:pb-6" data-testid="page-tasks">
       <div className="flex justify-between items-center flex-wrap gap-4 mb-8">
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
@@ -97,7 +99,10 @@ export default function Tasks() {
           </h1>
           <p className="text-muted-foreground mt-2 text-lg">Manage and organize your tasks</p>
         </div>
-        <Link href="/tasks/new">
+        <Link 
+          href="/tasks/new"
+          onClick={() => sessionStorage.setItem("previousLocation", "/tasks")}
+        >
           <Button 
             size="lg"
             className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300"
@@ -151,7 +156,7 @@ export default function Tasks() {
           <p className="text-muted-foreground">No tasks found. Try adjusting your filters.</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-mobile-md md:space-y-3">
           {filteredTasks.map((task) => (
             <TaskCard
               key={task.id}

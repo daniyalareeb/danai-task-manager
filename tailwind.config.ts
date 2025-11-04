@@ -16,6 +16,14 @@ export default {
         foreground: "hsl(var(--foreground) / <alpha-value>)",
         border: "hsl(var(--border) / <alpha-value>)",
         input: "hsl(var(--input) / <alpha-value>)",
+        gradient: {
+          "blue-start": "hsl(var(--gradient-blue-start) / <alpha-value>)",
+          "blue-end": "hsl(var(--gradient-blue-end) / <alpha-value>)",
+          "purple-start": "hsl(var(--gradient-purple-start) / <alpha-value>)",
+          "purple-end": "hsl(var(--gradient-purple-end) / <alpha-value>)",
+          "green-start": "hsl(var(--gradient-green-start) / <alpha-value>)",
+          "green-end": "hsl(var(--gradient-green-end) / <alpha-value>)",
+        },
         card: {
           DEFAULT: "hsl(var(--card) / <alpha-value>)",
           foreground: "hsl(var(--card-foreground) / <alpha-value>)",
@@ -86,6 +94,23 @@ export default {
         sans: ["var(--font-sans)"],
         serif: ["var(--font-serif)"],
         mono: ["var(--font-mono)"],
+      },
+      spacing: {
+        "mobile-xs": "var(--mobile-spacing-xs)",
+        "mobile-sm": "var(--mobile-spacing-sm)",
+        "mobile-md": "var(--mobile-spacing-md)",
+        "mobile-lg": "var(--mobile-spacing-lg)",
+        "mobile-xl": "var(--mobile-spacing-xl)",
+      },
+      fontSize: {
+        "mobile-xs": ["var(--mobile-text-xs)", { lineHeight: "1.5" }],
+        "mobile-sm": ["var(--mobile-text-sm)", { lineHeight: "1.5" }],
+        "mobile-base": ["var(--mobile-text-base)", { lineHeight: "1.5" }],
+        "mobile-lg": ["var(--mobile-text-lg)", { lineHeight: "1.5" }],
+        "mobile-xl": ["var(--mobile-text-xl)", { lineHeight: "1.5" }],
+        "mobile-2xl": ["var(--mobile-text-2xl)", { lineHeight: "1.4" }],
+        "mobile-3xl": ["var(--mobile-text-3xl)", { lineHeight: "1.3" }],
+        "mobile-4xl": ["var(--mobile-text-4xl)", { lineHeight: "1.2" }],
       },
       keyframes: {
         "accordion-down": {

@@ -1,3 +1,21 @@
+/**
+ * AI-Powered Task Scheduling & Prioritization
+ * 
+ * Uses OpenRouter API to access free AI models for:
+ * - Task prioritization based on deadlines, urgency, and dependencies
+ * - Intelligent scheduling based on available time slots
+ * - Natural language processing for task analysis
+ * 
+ * Models Used (Free Tier):
+ * - deepseek/deepseek-chat:free (primary)
+ * - google/gemini-2.0-flash-exp:free (fallback)
+ * - meta-llama/llama-3.2-3b-instruct:free (fallback)
+ * - qwen/qwen-2.5-7b-instruct:free (fallback)
+ * 
+ * The system automatically tries multiple models if one fails,
+ * ensuring reliability even with free tier limitations.
+ */
+
 import { format } from "date-fns";
 import { Task, PrioritizedTask, ScheduleResponse } from "@shared/schema";
 

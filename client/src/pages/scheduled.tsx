@@ -68,22 +68,27 @@ export default function Scheduled() {
   }
 
   return (
-    <div className="space-y-6" data-testid="page-scheduled">
+    <div className="space-y-mobile-md md:space-y-6 w-full max-w-full overflow-x-hidden pb-20 md:pb-6" data-testid="page-scheduled">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Scheduled Tasks</h1>
-        <p className="text-muted-foreground mt-1">View your AI-generated schedule</p>
+        <h1 className="text-mobile-2xl md:text-3xl font-bold text-foreground">Scheduled Tasks</h1>
+        <p className="text-muted-foreground mt-1 text-mobile-sm md:text-base">View your AI-generated schedule</p>
       </div>
 
       {scheduledTasks.length === 0 ? (
-        <div className="text-center py-12">
-          <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No scheduled tasks</h3>
-          <p className="text-muted-foreground">
+        <div className="flex flex-col items-center justify-center py-16 md:py-24 px-4">
+          <div className="relative mb-6">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full blur-2xl"></div>
+            <div className="relative h-24 w-24 md:h-32 md:w-32 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/20 flex items-center justify-center">
+              <Calendar className="h-12 w-12 md:h-16 md:w-16 text-primary stroke-[1.5]" />
+            </div>
+          </div>
+          <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">No scheduled tasks</h3>
+          <p className="text-muted-foreground text-center max-w-md text-mobile-sm md:text-base">
             Use the AI Scheduler to create an optimized schedule for your tasks.
           </p>
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-mobile-lg md:space-y-8">
           {sortedDates.map((dateKey) => {
             const date = new Date(dateKey);
             const tasksForDate = tasksByDate[dateKey].sort((a, b) => {
@@ -96,7 +101,7 @@ export default function Scheduled() {
                 <h2 className="text-xl font-semibold mb-4 sticky top-0 bg-background/95 backdrop-blur-sm py-2 z-10">
                   {format(date, "EEEE, MMMM d, yyyy")}
                 </h2>
-                <div className="space-y-3">
+                <div className="space-y-mobile-md md:space-y-3">
                   {tasksForDate.map((task) => (
                     <TaskCard
                       key={task.id}

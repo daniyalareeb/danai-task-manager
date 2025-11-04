@@ -1,3 +1,17 @@
+/**
+ * New Task Page
+ * 
+ * Allows users to create new tasks with:
+ * - Task title, description, priority, deadline, estimated duration
+ * - Automatic navigation back to previous page after creation
+ * - Browser history support for natural back button behavior
+ * 
+ * Navigation Logic:
+ * - Stores previous location in sessionStorage when navigating to this page
+ * - Uses browser history.back() when available for native navigation
+ * - Falls back to programmatic navigation if history unavailable
+ */
+
 import { useMutation } from "@tanstack/react-query";
 import { type InsertTask } from "@shared/schema";
 import { TaskForm } from "@/components/task-form";
@@ -9,7 +23,17 @@ import { Button } from "@/components/ui/button";
 
 export default function NewTask() {
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+
+  /**
+   * Retrieves the previous location from sessionStorage
+   * Falls back to dashboard (/) if no previous location stored
+   * @returns The previous route path
+   */
+  const getPreviousLocation = () => {
+    const stored = sessionStorage.getItem("previousLocation");
+    return stored || "/";
+  };
 
   const createTaskMutation = useMutation({
     mutationFn: async (data: InsertTask) => {
@@ -21,7 +45,13 @@ export default function NewTask() {
         title: "Task created",
         description: "Your task has been created successfully.",
       });
-      setLocation("/tasks");
+      // Go back to previous location or use browser history
+      const previousLocation = getPreviousLocation();
+      if (window.history.length > 1 && previousLocation !== location) {
+        window.history.back();
+      } else {
+        setLocation(previousLocation);
+      }
     },
     onError: () => {
       toast({
@@ -38,7 +68,15 @@ export default function NewTask() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setLocation("/tasks")}
+          onClick={() => {
+            // Use browser history if available, otherwise go to previous location or dashboard
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              const previousLocation = getPreviousLocation();
+              setLocation(previousLocation);
+            }
+          }}
           data-testid="button-back"
         >
           <ArrowLeft className="h-5 w-5" />

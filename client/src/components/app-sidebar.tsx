@@ -10,12 +10,30 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { CheckCircle2, Calendar, ListTodo, Sparkles, Settings, Zap } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Task } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 import { PWAInstall } from "./pwa-install";
+
+function SidebarLink({ href, children, ...props }: { href: string; children: React.ReactNode; [key: string]: any }) {
+  const { isMobile, setOpenMobile } = useSidebar();
+  const [location] = useLocation();
+
+  const handleClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
+
+  return (
+    <Link href={href} onClick={handleClick} {...props}>
+      {children}
+    </Link>
+  );
+}
 
 export function AppSidebar() {
   const [location] = useLocation();
@@ -61,16 +79,16 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r border-border/50">
-      <SidebarHeader className="p-4 border-b border-sidebar-border/50 bg-gradient-to-br from-primary/5 to-primary/0">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
-            <Zap className="w-6 h-6 text-primary-foreground fill-primary-foreground" />
+      <SidebarHeader className="p-3 md:p-4 border-b border-sidebar-border/50 bg-gradient-to-br from-primary/5 to-primary/0 safe-area-top pt-[calc(env(safe-area-inset-top)+0.75rem)] md:pt-[calc(env(safe-area-inset-top)+1rem)]">
+        <div className="flex items-center gap-2 md:gap-3">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
+            <Zap className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground fill-primary-foreground" />
           </div>
           <div>
-            <h1 className="font-bold text-xl text-sidebar-foreground bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            <h1 className="font-bold text-mobile-base md:text-xl text-sidebar-foreground bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
               Daniyal To-Do
             </h1>
-            <p className="text-xs text-muted-foreground font-medium">Smart Task Manager</p>
+            <p className="text-mobile-xs md:text-xs text-muted-foreground font-medium">Smart Task Manager</p>
           </div>
         </div>
       </SidebarHeader>
@@ -84,17 +102,17 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     data-active={location === item.url}
-                    className="data-[active=true]:bg-sidebar-accent"
+                    className="data-[active=true]:bg-sidebar-accent min-h-[44px]"
                   >
-                    <Link href={item.url} data-testid={`link-${item.title.toLowerCase().replace(/[']/g, '').replace(/\s+/g, '-')}`}>
+                    <SidebarLink href={item.url} data-testid={`link-${item.title.toLowerCase().replace(/[']/g, '').replace(/\s+/g, '-')}`}>
                       <item.icon className="w-5 h-5" />
-                      <span>{item.title}</span>
+                      <span className="text-mobile-sm md:text-sm">{item.title}</span>
                       {item.badge !== undefined && (
-                        <Badge variant="secondary" className="ml-auto">
+                        <Badge variant="secondary" className="ml-auto text-mobile-xs md:text-xs">
                           {item.badge}
                         </Badge>
                       )}
-                    </Link>
+                    </SidebarLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -106,11 +124,11 @@ export function AppSidebar() {
         <PWAInstall />
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild data-active={location === "/settings"} className="data-[active=true]:bg-sidebar-accent">
-              <Link href="/settings" data-testid="link-settings">
+            <SidebarMenuButton asChild data-active={location === "/settings"} className="data-[active=true]:bg-sidebar-accent min-h-[44px]">
+              <SidebarLink href="/settings" data-testid="link-settings">
                 <Settings className="w-5 h-5" />
-                <span>Settings</span>
-              </Link>
+                <span className="text-mobile-sm md:text-sm">Settings</span>
+              </SidebarLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

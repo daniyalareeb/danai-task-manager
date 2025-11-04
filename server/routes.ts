@@ -1,3 +1,17 @@
+/**
+ * API Routes Configuration
+ * 
+ * Defines all REST API endpoints:
+ * - Task CRUD operations (GET, POST, PATCH, DELETE)
+ * - Availability management
+ * - AI-powered prioritization and scheduling
+ * 
+ * All routes include:
+ * - Input validation using Zod schemas
+ * - Error handling with appropriate HTTP status codes
+ * - Consistent JSON response format
+ */
+
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
@@ -5,6 +19,11 @@ import { prioritizeTasks, generateSchedule } from "./ai";
 import { insertTaskSchema, insertAvailabilitySchema, updateTaskSchema, updateAvailabilitySchema } from "@shared/schema";
 import { z } from "zod";
 
+/**
+ * Registers all API routes with the Express app
+ * @param app Express application instance
+ * @returns HTTP server instance
+ */
 export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes
   app.get("/api/tasks", async (_req, res) => {
