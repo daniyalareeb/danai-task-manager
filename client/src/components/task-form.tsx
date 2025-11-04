@@ -35,8 +35,11 @@ interface TaskFormProps {
 }
 
 export function TaskForm({ onSubmit, defaultValues, isLoading, onSaveAsTemplate, templateName, onTemplateNameChange }: TaskFormProps) {
+  // Query templates but don't fail if endpoint doesn't exist
   const { data: templates = [] } = useQuery<TaskTemplate[]>({
     queryKey: ["/api/templates"],
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   const form = useForm<InsertTask & { saveAsTemplate?: boolean; templateId?: string }>({

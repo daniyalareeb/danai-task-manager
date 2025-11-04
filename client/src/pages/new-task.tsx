@@ -105,7 +105,7 @@ export default function NewTask() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6" data-testid="page-new-task">
+    <div className="max-w-2xl mx-auto space-y-6 pb-20 md:pb-6" data-testid="page-new-task">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -120,12 +120,13 @@ export default function NewTask() {
             }
           }}
           data-testid="button-back"
+          className="min-h-[44px] min-w-[44px]"
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Create New Task</h1>
-          <p className="text-muted-foreground mt-1">Add a task and let AI help you prioritize</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Create New Task</h1>
+          <p className="text-muted-foreground mt-1 text-sm md:text-base">Add a task and let AI help you prioritize</p>
         </div>
       </div>
 

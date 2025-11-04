@@ -38,7 +38,20 @@ const priorityLabels = {
 
 export function TaskCard({ task, onToggleComplete, onDelete, onEdit, onArchive, showAiInsights = false }: TaskCardProps) {
   const isCompleted = task.completed;
-  const isOverdue = task.deadline && new Date(task.deadline) < new Date() && !isCompleted;
+  
+  // Check if task is overdue (deadline has passed and task is not completed)
+  const isOverdue = task.deadline && !isCompleted && (() => {
+    try {
+      const deadline = new Date(task.deadline);
+      const now = new Date();
+      // Set time to midnight for accurate date comparison
+      deadline.setHours(0, 0, 0, 0);
+      now.setHours(0, 0, 0, 0);
+      return deadline < now;
+    } catch {
+      return false;
+    }
+  })();
   
   // Priority border colors - thicker and more visible
   const priorityBorderColors = {
@@ -51,10 +64,16 @@ export function TaskCard({ task, onToggleComplete, onDelete, onEdit, onArchive, 
   const borderColor = priorityBorderColors[task.priority as keyof typeof priorityBorderColors] || "";
   
   // Check if task is due today
-  const isDueToday = task.deadline && !isCompleted && (() => {
-    const deadline = new Date(task.deadline);
-    const today = new Date();
-    return deadline.toDateString() === today.toDateString();
+  const isDueToday = task.deadline && !isCompleted && !isOverdue && (() => {
+    try {
+      const deadline = new Date(task.deadline);
+      const today = new Date();
+      deadline.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+      return deadline.getTime() === today.getTime();
+    } catch {
+      return false;
+    }
   })();
 
   // Parse tags from comma-separated string
