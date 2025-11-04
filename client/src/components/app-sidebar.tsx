@@ -12,7 +12,7 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { CheckCircle2, Calendar, ListTodo, Sparkles, Settings, Zap, FileText, Archive } from "lucide-react";
+import { CheckCircle2, Calendar, ListTodo, Sparkles, Settings, Zap, Archive } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Task } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
@@ -74,11 +74,6 @@ export function AppSidebar() {
       title: "Completed",
       url: "/completed",
       icon: CheckCircle2,
-    },
-    {
-      title: "Templates",
-      url: "/templates",
-      icon: FileText,
     },
     {
       title: "Archived",

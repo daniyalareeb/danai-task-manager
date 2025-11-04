@@ -117,7 +117,7 @@ export default function Dashboard() {
           </div>
         </div>
         <Link 
-          href="/tasks/new"
+          href="/new-task"
           onClick={() => sessionStorage.setItem("previousLocation", "/")}
         >
           <Button 

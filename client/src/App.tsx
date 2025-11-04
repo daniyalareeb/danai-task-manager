@@ -17,7 +17,6 @@ import NewTask from "@/pages/new-task";
 import Scheduler from "@/pages/scheduler-enhanced";
 import Scheduled from "@/pages/scheduled";
 import Completed from "@/pages/completed";
-import Templates from "@/pages/templates";
 import Archived from "@/pages/archived";
 import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
@@ -32,7 +31,6 @@ function Router() {
       <Route path="/scheduler" component={Scheduler} />
       <Route path="/scheduled" component={Scheduled} />
       <Route path="/completed" component={Completed} />
-      <Route path="/templates" component={Templates} />
       <Route path="/archived" component={Archived} />
       <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
