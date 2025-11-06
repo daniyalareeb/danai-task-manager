@@ -227,7 +227,13 @@ export const getQueryFn: <T>(options: {
         return await res.json();
       } catch (error: any) {
         // Log error for debugging
-        console.error("Query failed:", { url, error: error.message });
+        const errorMessage = error?.message || String(error) || "Unknown error";
+        console.error("Query failed:", { url, error: errorMessage });
+        // Don't throw for server sleep/timeout - return empty array/object instead
+        if (errorMessage.includes("timeout") || errorMessage.includes("unreachable") || errorMessage.includes("Failed to fetch")) {
+          console.warn("Server appears to be sleeping, returning empty result");
+          return Array.isArray(queryKey) && queryKey[0] === "/api/tasks" ? [] : null;
+        }
         throw error;
       }
     }
@@ -257,7 +263,13 @@ export const getQueryFn: <T>(options: {
         throw new Error("Request timed out. Server may be unreachable.");
       }
       // Log error for debugging
-      console.error("Query failed:", { url, error: error.message });
+      const errorMessage = error?.message || String(error) || "Unknown error";
+      console.error("Query failed:", { url, error: errorMessage });
+      // Don't throw for server sleep/timeout - return empty array/object instead
+      if (errorMessage.includes("timeout") || errorMessage.includes("unreachable") || errorMessage.includes("Failed to fetch")) {
+        console.warn("Server appears to be sleeping, returning empty result");
+        return Array.isArray(queryKey) && queryKey[0] === "/api/tasks" ? [] : null;
+      }
       throw error;
     }
   };
@@ -281,6 +293,8 @@ export const queryClient = new QueryClient({
       retry: 1, // Allow one retry on failure
       retryDelay: 2000, // 2 second delay between retries
       refetchOnMount: true, // Refetch when component mounts
+      // Don't throw errors - return empty data instead to prevent UI blocking
+      throwOnError: false,
     },
     mutations: {
       retry: 2, // Retry twice with delays (handles server sleep)

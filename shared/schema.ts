@@ -59,7 +59,7 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   description: z.string().optional(),
   priority: z.enum(["low", "medium", "high", "urgent"]).default("medium"),
   status: z.enum(["pending", "scheduled", "in-progress", "completed"]).default("pending"),
-  estimatedDuration: z.number().min(1).optional(),
+  estimatedDuration: z.number().min(0.5).optional(),
   deadline: z.string().optional().transform(val => val ? new Date(val) : undefined),
   scheduledStart: z.string().optional().transform(val => val ? new Date(val) : undefined),
   scheduledEnd: z.string().optional().transform(val => val ? new Date(val) : undefined),
@@ -89,7 +89,7 @@ export const updateTaskSchema = z.object({
   description: z.string().optional(),
   priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
   status: z.enum(["pending", "scheduled", "in-progress", "completed"]).optional(),
-  estimatedDuration: z.number().min(1).optional(),
+  estimatedDuration: z.number().min(0.5).optional(),
   deadline: z.string().optional().transform(val => val ? new Date(val) : undefined),
   scheduledStart: z.string().optional().transform(val => val ? new Date(val) : undefined),
   scheduledEnd: z.string().optional().transform(val => val ? new Date(val) : undefined),
@@ -120,7 +120,7 @@ export const insertTaskTemplateSchema = createInsertSchema(taskTemplates).omit({
   title: z.string().min(1, "Task title is required"),
   description: z.string().optional(),
   priority: z.enum(["low", "medium", "high", "urgent"]).default("medium"),
-  estimatedDuration: z.number().min(1).optional(),
+  estimatedDuration: z.number().min(0.5).optional(),
   category: z.string().optional().nullable(),
 });
 

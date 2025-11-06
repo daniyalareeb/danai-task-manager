@@ -302,6 +302,7 @@ export function CalendarAvailability() {
                             </Badge>
                             <Input
                               type="time"
+                              step="60"
                               value={displayStart}
                               onChange={(e) => {
                                 if (isEditing) {
@@ -317,6 +318,7 @@ export function CalendarAvailability() {
                             <span className="text-xs text-muted-foreground">to</span>
                             <Input
                               type="time"
+                              step="60"
                               value={displayEnd}
                               onChange={(e) => {
                                 if (isEditing) {
@@ -415,6 +417,7 @@ export function CalendarAvailability() {
               <label className="text-sm font-medium">Start Time</label>
               <Input
                 type="time"
+                step="60"
                 value={newSlotTime.startTime}
                 onChange={(e) => setNewSlotTime({ ...newSlotTime, startTime: e.target.value })}
               />
@@ -423,6 +426,7 @@ export function CalendarAvailability() {
               <label className="text-sm font-medium">End Time</label>
               <Input
                 type="time"
+                step="60"
                 value={newSlotTime.endTime}
                 onChange={(e) => setNewSlotTime({ ...newSlotTime, endTime: e.target.value })}
               />

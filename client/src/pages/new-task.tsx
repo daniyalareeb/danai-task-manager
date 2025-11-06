@@ -105,7 +105,7 @@ export default function NewTask() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 pb-20 md:pb-6" data-testid="page-new-task">
+    <div className="max-w-2xl mx-auto space-y-6 pb-20 md:pb-6 px-4" data-testid="page-new-task">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -130,13 +130,15 @@ export default function NewTask() {
         </div>
       </div>
 
-      <TaskForm
-        onSubmit={(data) => createTaskMutation.mutate(data)}
-        isLoading={createTaskMutation.isPending}
-        onSaveAsTemplate={handleSaveAsTemplate}
-        templateName={templateName}
-        onTemplateNameChange={setTemplateName}
-      />
+      <div>
+        <TaskForm
+          onSubmit={(data) => createTaskMutation.mutate(data)}
+          isLoading={createTaskMutation.isPending}
+          onSaveAsTemplate={handleSaveAsTemplate}
+          templateName={templateName}
+          onTemplateNameChange={setTemplateName}
+        />
+      </div>
     </div>
   );
 }

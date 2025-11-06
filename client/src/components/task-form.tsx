@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTaskSchema, type InsertTask, type TaskTemplate } from "@shared/schema";
@@ -36,10 +36,17 @@ interface TaskFormProps {
 
 export function TaskForm({ onSubmit, defaultValues, isLoading, onSaveAsTemplate, templateName, onTemplateNameChange }: TaskFormProps) {
   // Query templates but don't fail if endpoint doesn't exist
+  // Disabled since templates page was removed
   const { data: templates = [] } = useQuery<TaskTemplate[]>({
     queryKey: ["/api/templates"],
+    queryFn: async () => {
+      // This won't execute since enabled is false, but added for type safety
+      const response = await apiRequest("GET", "/api/templates");
+      return await response.json();
+    },
     retry: false,
     refetchOnWindowFocus: false,
+    enabled: false, // Disable templates query since we removed templates page
   });
 
   const form = useForm<InsertTask & { saveAsTemplate?: boolean; templateId?: string }>({
@@ -61,7 +68,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, onSaveAsTemplate,
   const selectedTemplateId = form.watch("templateId");
 
   // Load template when selected
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedTemplateId && templates.length > 0) {
       const template = templates.find(t => t.id === selectedTemplateId);
       if (template) {

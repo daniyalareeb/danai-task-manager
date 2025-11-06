@@ -170,6 +170,51 @@ export async function generateSchedule(
     return { schedule: [] };
   }
 
+  // Filter out past availability slots and adjust partially past slots
+  const now = new Date();
+  const filteredAvailability = availability.map(avail => {
+    const slotDate = new Date(avail.date);
+    const startTime = avail.startTime || "09:00";
+    const endTime = avail.endTime || "18:00";
+    const [startHour, startMin] = startTime.split(':').map(Number);
+    const [endHour, endMin] = endTime.split(':').map(Number);
+    
+    const slotStart = new Date(slotDate);
+    slotStart.setHours(startHour, startMin, 0, 0);
+    
+    const slotEnd = new Date(slotDate);
+    slotEnd.setHours(endHour, endMin, 0, 0);
+    
+    // If slot has completely passed, skip it
+    if (slotEnd.getTime() < now.getTime()) {
+      return null;
+    }
+    
+    // If slot is partially past, adjust start time to current time
+    if (slotStart.getTime() < now.getTime() && slotEnd.getTime() >= now.getTime()) {
+      const adjustedStartTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      const adjustedHours = ((slotEnd.getTime() - now.getTime()) / (1000 * 60 * 60));
+      
+      console.log(`[AI] Adjusting partially past slot: ${startTime}-${endTime} -> ${adjustedStartTime}-${endTime} (${adjustedHours.toFixed(2)}h remaining)`);
+      
+      return {
+        ...avail,
+        startTime: adjustedStartTime,
+        availableHours: Math.max(0.5, adjustedHours), // Ensure at least 0.5 hours
+      };
+    }
+    
+    // Slot is in the future, use as-is
+    return avail;
+  }).filter((avail): avail is NonNullable<typeof avail> => avail !== null);
+
+  console.log(`[AI] Filtered availability: ${availability.length} -> ${filteredAvailability.length} slots (removed ${availability.length - filteredAvailability.length} past slots)`);
+
+  if (filteredAvailability.length === 0) {
+    console.log("[AI] No future availability slots - returning empty schedule");
+    return { schedule: [] };
+  }
+
   // Filter for active tasks with duration
   // After clearing old schedules in routes.ts, we reschedule all incomplete tasks
   // This includes: unscheduled tasks, and tasks that had their old schedules cleared (carryover)
@@ -225,7 +270,7 @@ export async function generateSchedule(
 - Deadline: ${task.deadline ? new Date(task.deadline).toISOString() : "No deadline"}`;
   }).join("\n\n");
 
-  const availabilityDescriptions = availability.map((avail, index) => {
+  const availabilityDescriptions = filteredAvailability.map((avail, index) => {
     const dateStr = format(avail.date, "yyyy-MM-dd");
     return `Slot ${index + 1}:
 - Date: ${dateStr}
@@ -247,6 +292,7 @@ IMPORTANT: When scheduling, you MUST:
 - Schedule tasks between startTime and endTime only
 - Ensure task starts early enough to finish before endTime
 - Add 15-30 min buffer between tasks when possible
+- Only schedule tasks in time slots that haven't passed yet (all slots provided are current or future)
 
 Return a JSON object with a "schedule" array. Each item needs:
 - taskId: the task ID
@@ -294,23 +340,40 @@ Return ONLY valid JSON like: {"schedule": [{"taskId": "...", "scheduledStart": "
     const schedule: ScheduleResponse["schedule"] = [];
     let currentAvailIndex = 0;
     
-    console.log(`[AI] Fallback: Scheduling ${Math.min(activeTasks.length, availability.length)} tasks`);
+    console.log(`[AI] Fallback: Scheduling ${Math.min(activeTasks.length, filteredAvailability.length)} tasks`);
     
     for (const task of activeTasks.slice(0, 3)) {
-      if (currentAvailIndex >= availability.length) {
+      if (currentAvailIndex >= filteredAvailability.length) {
         console.log(`[AI] No more availability slots at index ${currentAvailIndex}`);
         break;
       }
       
-      const avail = availability[currentAvailIndex];
+      const avail = filteredAvailability[currentAvailIndex];
       const startTime = avail.startTime || "09:00";
       const [hours, minutes] = startTime.split(':').map(Number);
       
       const start = new Date(avail.date);
       start.setHours(hours, minutes, 0, 0);
       
+      // Ensure start time is not in the past
+      if (start.getTime() < now.getTime()) {
+        start.setTime(now.getTime());
+      }
+      
       const end = new Date(start);
       end.setHours(start.getHours() + (task.estimatedDuration || 1));
+      
+      // Check if task fits in the slot
+      const slotEnd = new Date(avail.date);
+      const endTime = avail.endTime || "18:00";
+      const [endHour, endMin] = endTime.split(':').map(Number);
+      slotEnd.setHours(endHour, endMin, 0, 0);
+      
+      if (end.getTime() > slotEnd.getTime()) {
+        console.log(`[AI] Task ${task.title} doesn't fit in slot, skipping`);
+        currentAvailIndex++;
+        continue;
+      }
       
       console.log(`[AI] Scheduling task ${task.title} on ${start.toISOString()} to ${end.toISOString()}`);
       

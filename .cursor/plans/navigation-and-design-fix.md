@@ -89,3 +89,5 @@
 - [ ] Dashboard background gradient is visible
 - [ ] Stat card colors are vibrant and visible
 
+
+
