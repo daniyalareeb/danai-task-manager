@@ -16,35 +16,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Install Node.js 20 using nvm
-      run: |
-        # Install nvm
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-        export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-        
-        # Install and use Node.js 20 (latest LTS)
-        nvm install 20 --latest-npm
-        nvm use 20
-        nvm alias default 20
-        
-        # Get the exact Node.js path
-        NODE_PATH=$(nvm which 20)
-        NODE_DIR=$(dirname "$NODE_PATH")
-        
-        # Verify installation
-        echo "Installed Node.js version:"
-        "$NODE_PATH" --version
-        echo "Installed npm version:"
-        "$NODE_DIR/npm" --version
-        
-        # Add to PATH for ALL subsequent steps
-        echo "$NODE_DIR" >> $GITHUB_PATH
-        echo "NODE_VERSION=$("$NODE_PATH" --version)" >> $GITHUB_ENV
-        echo "NODE_PATH=$NODE_DIR" >> $GITHUB_ENV
-        
-        # Verify PATH is set correctly
-        echo "NODE_PATH set to: $NODE_DIR"
+    - name: Setup Node.js 20
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
     
     - name: Verify Node.js version
       run: |
@@ -60,14 +36,11 @@ jobs:
     
     - name: Install dependencies
       run: |
-        # Ensure Node.js 20 is in PATH
-        export PATH="$NODE_PATH:$PATH"
         node --version
         npm ci
     
     - name: Build web assets
       run: |
-        export PATH="$NODE_PATH:$PATH"
         node --version
         npm run build:web
     
@@ -80,7 +53,6 @@ jobs:
     
     - name: Sync Capacitor
       run: |
-        export PATH="$NODE_PATH:$PATH"
         node --version
         npx cap sync ios
     
