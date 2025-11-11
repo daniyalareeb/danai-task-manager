@@ -16,12 +16,28 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Setup Node.js 20
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20.11.0'
-        cache: 'npm'
-        check-latest: true
+    - name: Install Node.js 20 using nvm
+      run: |
+        # Install nvm if not available
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" || {
+          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        }
+        
+        # Install and use Node.js 20
+        nvm install 20
+        nvm use 20
+        nvm alias default 20
+        
+        # Verify installation
+        node --version
+        npm --version
+        
+        # Add to PATH for subsequent steps
+        echo "NODE_VERSION=$(node --version)" >> $GITHUB_ENV
+        echo "$HOME/.nvm/versions/node/$(node --version | cut -d'v' -f2)/bin" >> $GITHUB_PATH
     
     - name: Verify Node.js version
       run: |
