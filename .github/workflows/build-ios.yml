@@ -23,22 +23,28 @@ jobs:
         export NVM_DIR="$HOME/.nvm"
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
         
-        # Install and use Node.js 20
-        nvm install 20
+        # Install and use Node.js 20 (latest LTS)
+        nvm install 20 --latest-npm
         nvm use 20
+        nvm alias default 20
         
         # Get the exact Node.js path
         NODE_PATH=$(nvm which 20)
         NODE_DIR=$(dirname "$NODE_PATH")
         
         # Verify installation
+        echo "Installed Node.js version:"
         "$NODE_PATH" --version
+        echo "Installed npm version:"
         "$NODE_DIR/npm" --version
         
         # Add to PATH for ALL subsequent steps
         echo "$NODE_DIR" >> $GITHUB_PATH
         echo "NODE_VERSION=$("$NODE_PATH" --version)" >> $GITHUB_ENV
         echo "NODE_PATH=$NODE_DIR" >> $GITHUB_ENV
+        
+        # Verify PATH is set correctly
+        echo "NODE_PATH set to: $NODE_DIR"
     
     - name: Verify Node.js version
       run: |
