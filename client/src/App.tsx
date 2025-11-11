@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, useLocation, Link } from "wouter";
 import { useEffect } from "react";
 import { App as CapacitorApp } from "@capacitor/app";
 import { queryClient, apiRequest } from "./lib/queryClient";
@@ -21,6 +21,9 @@ import Archived from "@/pages/archived";
 import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 import { QuickAdd } from "@/components/quick-add";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
+import { Settings as SettingsIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 function Router() {
   return (
@@ -135,13 +138,32 @@ function AppContent() {
       <AppSidebar />
       <div className="flex flex-col flex-1 overflow-hidden relative max-w-full min-w-0">
         <header className="flex items-center justify-between p-mobile-sm md:p-4 border-b border-border/50 backdrop-blur-md bg-background/95 sticky top-0 z-40 w-full max-w-full flex-shrink-0">
-          <SidebarTrigger data-testid="button-sidebar-toggle" className="hover:bg-accent/50 transition-colors min-h-[44px] min-w-[44px] flex-shrink-0" />
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <SidebarTrigger data-testid="button-sidebar-toggle" className="md:flex hidden hover:bg-accent/50 transition-colors min-h-[44px] min-w-[44px] flex-shrink-0" />
+            <div className="md:hidden flex items-center gap-2">
+              <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
+              <h1 className="text-mobile-lg font-bold text-foreground">Daniyal To-Do</h1>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link href="/settings" className="md:hidden">
+              <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]">
+                <SettingsIcon className="h-5 w-5" />
+              </Button>
+            </Link>
+            <ThemeToggle />
+          </div>
         </header>
-        <main className="flex-1 overflow-y-auto overflow-x-hidden overscroll-none p-mobile-md md:p-6 w-full max-w-full min-w-0 pb-24 md:pb-6" style={{ overscrollBehavior: 'none', WebkitOverflowScrolling: 'touch' }}>
+        <main className="flex-1 overflow-y-auto overflow-x-hidden overscroll-none p-mobile-md md:p-6 w-full max-w-full min-w-0 md:pb-6" style={{ 
+          overscrollBehavior: 'none', 
+          WebkitOverflowScrolling: 'touch', 
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 5rem)',
+          marginBottom: 0
+        }}>
           <Router />
         </main>
       </div>
+      <MobileBottomNav />
       <QuickAdd />
     </div>
   );

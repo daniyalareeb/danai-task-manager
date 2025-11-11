@@ -88,13 +88,13 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, onSaveAsTemplate,
   }, [selectedTemplateId, templates, form]);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">
+    <Card className="shadow-lg border-border/50">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-xl md:text-2xl">
           {defaultValues ? "Edit Task" : "Create New Task"}
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4 md:space-y-6 pb-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit((data) => {
             const { saveAsTemplate, templateId, templateName, ...taskData } = data;

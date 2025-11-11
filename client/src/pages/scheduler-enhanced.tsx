@@ -183,45 +183,45 @@ export default function Scheduler() {
 
   return (
     <div className="space-y-6 page-transition pb-20 md:pb-6" data-testid="page-scheduler">
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-8 md:p-10 text-white shadow-2xl">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-transparent"></div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="h-14 w-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-xl">
-              <Sparkles className="h-7 w-7 text-white" />
+      {/* Compact Header */}
+      <Card className="bg-gradient-to-br from-indigo-600/90 via-purple-600/90 to-pink-600/90 border-0 shadow-lg overflow-hidden">
+        <CardContent className="p-4 md:p-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+                <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl md:text-2xl font-bold text-white">Smart Scheduler</h1>
+                <p className="text-white/80 text-xs md:text-sm">AI-powered task scheduling</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-1">Smart Scheduler</h1>
-              <p className="text-white/80 text-lg">AI-powered task scheduling</p>
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-lg px-3 py-2 border border-white/20">
+                <Calendar className="h-4 w-4 text-white" />
+                <div className="flex flex-col">
+                  <span className="font-bold text-base md:text-lg text-white leading-none">{availability.length}</span>
+                  <span className="text-[10px] md:text-xs opacity-80 text-white">slots</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-lg px-3 py-2 border border-white/20">
+                <Zap className="h-4 w-4 text-white" />
+                <div className="flex flex-col">
+                  <span className="font-bold text-base md:text-lg text-white leading-none">{activeTasks.length}</span>
+                  <span className="text-[10px] md:text-xs opacity-80 text-white">tasks</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-lg px-3 py-2 border border-white/20">
+                <Clock className="h-4 w-4 text-white" />
+                <div className="flex flex-col">
+                  <span className="font-bold text-base md:text-lg text-white leading-none">{scheduledTasks.length}</span>
+                  <span className="text-[10px] md:text-xs opacity-80 text-white">done</span>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-3 mt-6">
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md rounded-xl px-5 py-3 border border-white/20 shadow-lg hover:bg-white/15 transition-all">
-              <Calendar className="h-5 w-5" />
-              <div className="flex flex-col">
-                <span className="font-bold text-2xl">{availability.length}</span>
-                <span className="text-xs opacity-80">available slots</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md rounded-xl px-5 py-3 border border-white/20 shadow-lg hover:bg-white/15 transition-all">
-              <Zap className="h-5 w-5" />
-              <div className="flex flex-col">
-                <span className="font-bold text-2xl">{activeTasks.length}</span>
-                <span className="text-xs opacity-80">active tasks</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md rounded-xl px-5 py-3 border border-white/20 shadow-lg hover:bg-white/15 transition-all">
-              <Clock className="h-5 w-5" />
-              <div className="flex flex-col">
-                <span className="font-bold text-2xl">{scheduledTasks.length}</span>
-                <span className="text-xs opacity-80">scheduled</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Error Alert */}
       {hasError && (

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, boolean, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -31,7 +31,7 @@ export const tasks = pgTable("tasks", {
 export const availability = pgTable("availability", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   date: timestamp("date").notNull(),
-  availableHours: integer("available_hours").notNull(),
+  availableHours: real("available_hours").notNull(), // Changed to real to support decimals
   startTime: text("start_time"),
   endTime: text("end_time"),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
@@ -78,7 +78,7 @@ export const insertAvailabilitySchema = createInsertSchema(availability).omit({
   createdAt: true,
 }).extend({
   date: z.string().transform(val => new Date(val)),
-  availableHours: z.number().min(1).max(24),
+  availableHours: z.number().min(0.5).max(24), // Allow decimals (e.g., 5.5 hours)
   startTime: z.string().optional(),
   endTime: z.string().optional(),
 });
@@ -107,7 +107,7 @@ export const updateTaskSchema = z.object({
 
 export const updateAvailabilitySchema = z.object({
   date: z.string().transform(val => new Date(val)).optional(),
-  availableHours: z.number().min(1).max(24).optional(),
+  availableHours: z.number().min(0.5).max(24).optional(), // Allow decimals
   startTime: z.string().optional(),
   endTime: z.string().optional(),
 }).strict(); // Reject unknown fields

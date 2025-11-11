@@ -57,30 +57,20 @@ export function QuickAdd() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[100] safe-area-bottom" style={{ position: 'fixed', bottom: 'max(1rem, env(safe-area-inset-bottom, 1rem))', right: 'max(1rem, env(safe-area-inset-right, 1rem))' }}>
+    <div className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-[90] safe-area-bottom" style={{ position: 'fixed', bottom: 'max(5rem, calc(env(safe-area-inset-bottom, 1rem) + 4rem))', right: 'max(1rem, env(safe-area-inset-right, 1rem))' }}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button 
             size="lg" 
-            className="h-16 w-16 md:h-20 md:w-20 rounded-full shadow-2xl hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] hover:scale-110 active:scale-95 transition-all duration-300 bg-gradient-to-br from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary/90 hover:to-primary text-white border-0 relative overflow-visible group min-h-[64px] min-w-[64px] ring-4 ring-primary/20 dark:ring-primary/30 backdrop-blur-sm flex items-center justify-center"
+            className="h-14 w-14 md:h-16 md:w-16 rounded-full shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 bg-primary text-white border-0 flex items-center justify-center font-bold"
             data-testid="button-quick-add"
             aria-label="Add new task"
           >
-            {/* Outer glow effect */}
-            <div className="absolute -inset-2 bg-gradient-to-br from-primary/40 to-primary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />
-            
-            {/* Inner gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
-            
-            {/* Plus icon - made more prominent and visible */}
-            <div className="relative z-10 flex items-center justify-center">
-              <Plus className="h-8 w-8 md:h-10 md:w-10 text-white stroke-[4] drop-shadow-2xl" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }} />
-              {/* Additional inner highlight for better visibility */}
-              <Plus className="absolute h-8 w-8 md:h-10 md:w-10 text-white/80 stroke-[2.5] blur-[1px]" />
-            </div>
-            
-            {/* Pulse animation ring */}
-            <div className="absolute inset-0 rounded-full border-2 border-white/30 animate-ping opacity-0 group-hover:opacity-100" style={{ animationDuration: '2s' }} />
+            <Plus className="h-7 w-7 md:h-8 md:w-8 stroke-[5] stroke-white" style={{ 
+              filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.6))',
+              color: 'white',
+              fill: 'none'
+            }} />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[calc(100vw-2rem)] max-w-80 p-0 shadow-2xl border-0 overflow-hidden md:w-80 max-w-[calc(100vw-1rem)]" align="end">

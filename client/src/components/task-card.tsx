@@ -85,7 +85,7 @@ export function TaskCard({ task, onToggleComplete, onDelete, onEdit, onArchive, 
         <Checkbox
           checked={isCompleted}
           onCheckedChange={(checked) => onToggleComplete(task.id, checked as boolean)}
-          className="mt-1 h-5 w-5 md:h-6 md:w-6 min-h-[44px] min-w-[44px] flex-shrink-0"
+          className="mt-1 h-4 w-4 md:h-5 md:w-5 flex-shrink-0"
           data-testid={`checkbox-task-${task.id}`}
         />
         <div className="flex-1 min-w-0">
@@ -160,7 +160,7 @@ export function TaskCard({ task, onToggleComplete, onDelete, onEdit, onArchive, 
           )}
         </div>
       </CardHeader>
-      <CardContent className="pt-0 pl-11 md:pl-14 p-mobile-md md:p-6 pb-mobile-md md:pb-6">
+      <CardContent className="pt-0 pl-8 md:pl-12 p-mobile-md md:p-6 pb-mobile-md md:pb-6">
         <div className="space-y-3">
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">

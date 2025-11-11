@@ -91,13 +91,13 @@
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
-  /* Gradient colors (also defined in dark mode) */
-  --gradient-blue-start: 59 130% 52%;
-  --gradient-blue-end: 199 89% 48%;
-  --gradient-purple-start: 262 83% 58%;
-  --gradient-purple-end: 339 82% 52%;
-  --gradient-green-start: 142 71% 45%;
-  --gradient-green-end: 160 84% 39%;
+  /* Professional gradient colors - subtle and elegant */
+  --gradient-blue-start: 217 91% 60%;
+  --gradient-blue-end: 221 83% 53%;
+  --gradient-purple-start: 262 47% 51%;
+  --gradient-purple-end: 270 50% 45%;
+  --gradient-green-start: 142 52% 50%;
+  --gradient-green-end: 160 55% 45%;
 
   /* Automatically computed borders - intensity can be controlled by the user by the --opaque-button-border-intensity setting */
 
@@ -140,13 +140,13 @@
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
-  /* Gradient colors matching mobile design */
-  --gradient-blue-start: 59 130% 52%;
-  --gradient-blue-end: 199 89% 48%;
-  --gradient-purple-start: 262 83% 58%;
-  --gradient-purple-end: 339 82% 52%;
-  --gradient-green-start: 142 71% 45%;
-  --gradient-green-end: 160 84% 39%;
+  /* Professional gradient colors - subtle and elegant (dark mode) */
+  --gradient-blue-start: 217 91% 60%;
+  --gradient-blue-end: 221 83% 53%;
+  --gradient-purple-start: 262 47% 51%;
+  --gradient-purple-end: 270 50% 45%;
+  --gradient-green-start: 142 52% 50%;
+  --gradient-green-end: 160 55% 45%;
 
   /* Mobile-optimized spacing scale */
   --mobile-spacing-xs: clamp(0.5rem, 2vw, 0.75rem);
@@ -462,17 +462,35 @@
     box-shadow: 0 0 30px hsl(var(--primary) / 0.5);
   }
 
-  /* Gradient card utilities */
+  /* Professional gradient card utilities - subtle and elegant */
   .gradient-card-blue {
-    background: linear-gradient(135deg, hsl(var(--gradient-blue-start)), hsl(var(--gradient-blue-end)));
+    background: linear-gradient(135deg, hsl(var(--gradient-blue-start) / 0.95), hsl(var(--gradient-blue-end) / 0.9));
+    border: 1px solid hsl(var(--gradient-blue-start) / 0.2);
   }
 
   .gradient-card-purple {
-    background: linear-gradient(135deg, hsl(var(--gradient-purple-start)), hsl(var(--gradient-purple-end)));
+    background: linear-gradient(135deg, hsl(var(--gradient-purple-start) / 0.95), hsl(var(--gradient-purple-end) / 0.9));
+    border: 1px solid hsl(var(--gradient-purple-start) / 0.2);
   }
 
   .gradient-card-green {
-    background: linear-gradient(135deg, hsl(var(--gradient-green-start)), hsl(var(--gradient-green-end)));
+    background: linear-gradient(135deg, hsl(var(--gradient-green-start) / 0.95), hsl(var(--gradient-green-end) / 0.9));
+    border: 1px solid hsl(var(--gradient-green-start) / 0.2);
+  }
+
+  .dark .gradient-card-blue {
+    background: linear-gradient(135deg, hsl(var(--gradient-blue-start) / 0.15), hsl(var(--gradient-blue-end) / 0.12));
+    border: 1px solid hsl(var(--gradient-blue-start) / 0.3);
+  }
+
+  .dark .gradient-card-purple {
+    background: linear-gradient(135deg, hsl(var(--gradient-purple-start) / 0.15), hsl(var(--gradient-purple-end) / 0.12));
+    border: 1px solid hsl(var(--gradient-purple-start) / 0.3);
+  }
+
+  .dark .gradient-card-green {
+    background: linear-gradient(135deg, hsl(var(--gradient-green-start) / 0.15), hsl(var(--gradient-green-end) / 0.12));
+    border: 1px solid hsl(var(--gradient-green-start) / 0.3);
   }
 
   /* Mobile-responsive touch targets */

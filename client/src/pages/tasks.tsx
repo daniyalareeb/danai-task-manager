@@ -132,7 +132,7 @@ export default function Tasks() {
           <p className="text-muted-foreground mt-2 text-lg">Manage and organize your tasks</p>
         </div>
         <Link 
-          href="/tasks/new"
+          href="/new-task"
           onClick={() => sessionStorage.setItem("previousLocation", "/tasks")}
         >
           <Button 

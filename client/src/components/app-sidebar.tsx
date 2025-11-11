@@ -83,11 +83,11 @@ export function AppSidebar() {
   ];
 
   return (
-    <Sidebar className="border-r border-border/50">
+    <Sidebar className="border-r border-border/50 hidden md:flex">
       <SidebarHeader className="p-3 md:p-4 border-b border-sidebar-border/50 bg-gradient-to-br from-primary/5 to-primary/0 safe-area-top pt-[calc(env(safe-area-inset-top)+0.75rem)] md:pt-[calc(env(safe-area-inset-top)+1rem)]">
         <div className="flex items-center gap-2 md:gap-3">
-          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
-            <Zap className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground fill-primary-foreground" />
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 overflow-hidden">
+            <img src="/logo.svg" alt="Logo" className="w-full h-full" />
           </div>
           <div>
             <h1 className="font-bold text-mobile-base md:text-xl text-sidebar-foreground bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">

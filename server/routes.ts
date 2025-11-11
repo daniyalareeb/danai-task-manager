@@ -211,8 +211,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Expires', '0');
       
       const availability = await storage.getAllAvailability();
-      console.log(`[GET] Returning ${availability.length} availability slots`);
-      res.json(availability);
+      
+      // Auto-remove expired availability slots (past dates or past time slots)
+      const now = new Date();
+      const expiredSlots: string[] = [];
+      
+      for (const avail of availability) {
+        const slotDate = new Date(avail.date);
+        const endTime = avail.endTime || "23:59";
+        const [endHour, endMin] = endTime.split(':').map(Number);
+        
+        const slotEnd = new Date(slotDate);
+        slotEnd.setHours(endHour, endMin, 0, 0);
+        
+        // If slot has completely passed, mark for deletion
+        if (slotEnd.getTime() < now.getTime() && avail.id) {
+          expiredSlots.push(avail.id);
+        }
+      }
+      
+      // Delete expired slots
+      if (expiredSlots.length > 0) {
+        console.log(`[GET] Auto-removing ${expiredSlots.length} expired availability slots`);
+        for (const id of expiredSlots) {
+          try {
+            await storage.deleteAvailability(id);
+          } catch (error) {
+            console.warn(`[GET] Failed to delete expired slot ${id}:`, error);
+          }
+        }
+      }
+      
+      // Fetch updated availability after cleanup
+      const updatedAvailability = await storage.getAllAvailability();
+      console.log(`[GET] Returning ${updatedAvailability.length} availability slots (removed ${expiredSlots.length} expired)`);
+      res.json(updatedAvailability);
     } catch (error) {
       console.error("Error fetching availability:", error);
       res.status(500).json({ error: "Failed to fetch availability" });

@@ -133,72 +133,72 @@ export default function Dashboard() {
 
       {/* Gradient Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-mobile-md md:gap-4 w-full max-w-full">
-        {/* Active Card - Blue Gradient */}
-        <Card className="gradient-card-blue border-0 shadow-xl hover:shadow-2xl overflow-hidden relative hover-elevate transition-all duration-300 hover:scale-[1.02]">
+        {/* Active Card - Professional Blue */}
+        <Card className="gradient-card-blue shadow-lg hover:shadow-xl overflow-hidden relative hover-elevate transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-mobile-md md:p-6">
-            <CardTitle className="text-sm md:text-base font-semibold text-white">Active Tasks</CardTitle>
-            <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <BarChart3 className="h-4 w-4 md:h-5 md:w-5 text-white" />
+            <CardTitle className="text-sm md:text-base font-semibold text-foreground">Active Tasks</CardTitle>
+            <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+              <BarChart3 className="h-4 w-4 md:h-5 md:w-5 text-primary" />
             </div>
           </CardHeader>
           <CardContent className="p-mobile-md md:p-6 pt-0">
-            <div className="text-mobile-3xl md:text-4xl font-bold text-white mb-1 tracking-tight transition-all duration-300" data-testid="text-active-count">
+            <div className="text-mobile-3xl md:text-4xl font-bold text-foreground mb-1 tracking-tight transition-all duration-300" data-testid="text-active-count">
               {activeTasks.length}
             </div>
-            <p className="text-mobile-xs md:text-xs text-white/80 mb-3">
+            <p className="text-mobile-xs md:text-xs text-muted-foreground mb-3">
               {urgentTasks.length} urgent
             </p>
-            <div className="w-full bg-white/20 rounded-full h-1.5">
+            <div className="w-full bg-muted rounded-full h-1.5">
               <div 
-                className="bg-white h-1.5 rounded-full transition-all duration-500"
+                className="bg-primary h-1.5 rounded-full transition-all duration-500"
                 style={{ width: activeTasks.length > 0 ? `${Math.min((urgentTasks.length / activeTasks.length) * 100, 100)}%` : '0%' }}
               />
             </div>
           </CardContent>
         </Card>
 
-        {/* Today Card - Purple/Magenta Gradient */}
-        <Card className="gradient-card-purple border-0 shadow-xl hover:shadow-2xl overflow-hidden relative hover-elevate transition-all duration-300 hover:scale-[1.02]">
+        {/* Today Card - Professional Purple */}
+        <Card className="gradient-card-purple shadow-lg hover:shadow-xl overflow-hidden relative hover-elevate transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
-            <CardTitle className="text-sm md:text-base font-semibold text-white">Scheduled Today</CardTitle>
-            <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <Clock className="h-4 w-4 md:h-5 md:w-5 text-white" />
+            <CardTitle className="text-sm md:text-base font-semibold text-foreground">Scheduled Today</CardTitle>
+            <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center">
+              <Clock className="h-4 w-4 md:h-5 md:w-5 text-purple-600 dark:text-purple-400" />
             </div>
           </CardHeader>
           <CardContent className="p-mobile-md md:p-6 pt-0">
-            <div className="text-mobile-3xl md:text-4xl font-bold text-white mb-1 tracking-tight transition-all duration-300" data-testid="text-scheduled-count">
+            <div className="text-mobile-3xl md:text-4xl font-bold text-foreground mb-1 tracking-tight transition-all duration-300" data-testid="text-scheduled-count">
               {scheduledToday.length}
             </div>
-            <p className="text-mobile-xs md:text-xs text-white/80 mb-3">
+            <p className="text-mobile-xs md:text-xs text-muted-foreground mb-3">
               {scheduledToday.length} tasks on your calendar
             </p>
-            <div className="w-full bg-white/20 rounded-full h-1.5">
+            <div className="w-full bg-muted rounded-full h-1.5">
               <div 
-                className="bg-white h-1.5 rounded-full transition-all duration-500"
+                className="bg-purple-600 dark:bg-purple-500 h-1.5 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min((scheduledToday.length / Math.max(activeTasks.length, 1)) * 100, 100)}%` }}
               />
             </div>
           </CardContent>
         </Card>
 
-        {/* Time Card - Green Gradient */}
-        <Card className="gradient-card-green border-0 shadow-xl hover:shadow-2xl overflow-hidden relative hover-elevate transition-all duration-300 hover:scale-[1.02]">
+        {/* Time Card - Professional Green */}
+        <Card className="gradient-card-green shadow-lg hover:shadow-xl overflow-hidden relative hover-elevate transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
-            <CardTitle className="text-sm md:text-base font-semibold text-white">Estimated Time</CardTitle>
-            <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <Target className="h-4 w-4 md:h-5 md:w-5 text-white" />
+            <CardTitle className="text-sm md:text-base font-semibold text-foreground">Estimated Time</CardTitle>
+            <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center">
+              <Target className="h-4 w-4 md:h-5 md:w-5 text-green-600 dark:text-green-400" />
             </div>
           </CardHeader>
           <CardContent className="p-mobile-md md:p-6 pt-0">
-            <div className="text-mobile-3xl md:text-4xl font-bold text-white mb-1 tracking-tight transition-all duration-300" data-testid="text-estimated-hours">
+            <div className="text-mobile-3xl md:text-4xl font-bold text-foreground mb-1 tracking-tight transition-all duration-300" data-testid="text-estimated-hours">
               {totalEstimatedHours}h
             </div>
-            <p className="text-mobile-xs md:text-xs text-white/80 mb-3">
+            <p className="text-mobile-xs md:text-xs text-muted-foreground mb-3">
               total work remaining
             </p>
-            <div className="w-full bg-white/20 rounded-full h-1.5">
+            <div className="w-full bg-muted rounded-full h-1.5">
               <div 
-                className="bg-white h-1.5 rounded-full transition-all duration-500"
+                className="bg-green-600 dark:bg-green-500 h-1.5 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min((totalEstimatedHours / 40) * 100, 100)}%` }}
               />
             </div>

@@ -122,24 +122,32 @@ export default function Settings() {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <Label htmlFor="browser-notifications">Browser Notifications</Label>
+              <Label htmlFor="notifications">Notifications</Label>
               <p className="text-sm text-muted-foreground">
                 Receive push notifications for task reminders
               </p>
             </div>
             {isChecking ? (
               <Badge variant="secondary">Checking...</Badge>
-            ) : notificationsEnabled ? (
-              <Badge variant="secondary">Enabled</Badge>
             ) : (
-              <Button
-                onClick={requestNotificationPermission}
-                variant="outline"
-                size="sm"
-                data-testid="button-enable-notifications"
-              >
-                Enable
-              </Button>
+              <Switch
+                id="notifications"
+                checked={notificationsEnabled}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    requestNotificationPermission();
+                  } else {
+                    // Disable notifications
+                    setNotificationsEnabled(false);
+                    localStorage.setItem("dantask-notification-permission", "denied");
+                    toast({
+                      title: "Notifications disabled",
+                      description: "You won't receive task notifications.",
+                    });
+                  }
+                }}
+                data-testid="switch-notifications"
+              />
             )}
           </div>
 
