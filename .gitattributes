@@ -1,0 +1,10 @@
+# Handle line endings automatically for files detected as text
+* text=auto
+
+# Force binary files to use LF line endings
+*.apk binary
+*.ipa binary
+*.aab binary
+*.zip binary
+*.dmg binary
+
