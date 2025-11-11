@@ -68,7 +68,7 @@ jobs:
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: latest-stable
+        xcode-version: '16.1'
     
     - name: Build iOS Archive
       working-directory: ios/App
@@ -81,6 +81,7 @@ jobs:
           -scheme App \
           -configuration Release \
           -sdk iphoneos \
+          -destination 'generic/platform=iOS' \
           -archivePath build/App.xcarchive \
           archive \
           CODE_SIGN_IDENTITY="" \
@@ -94,6 +95,7 @@ jobs:
               -scheme App \
               -configuration Release \
               -sdk iphoneos \
+              -destination 'generic/platform=iOS' \
               -derivedDataPath build/DerivedData \
               CODE_SIGN_IDENTITY="" \
               CODE_SIGN_STYLE="Manual" \
