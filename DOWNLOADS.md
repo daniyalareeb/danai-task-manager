@@ -9,14 +9,14 @@
 
 ### Direct Download
 
-**👉 [Tap here to download Android APK](releases/danai-task-manager-android.apk)**
+**👉 [Tap here to download Android APK](https://github.com/daniyalareeb/danai-task-manager/raw/main/releases/danai-task-manager-android.apk)**
 
-Or right-click and "Save Link As" if the direct download doesn't work.
+This will start the download immediately. Works on mobile and desktop!
 
 ### Alternative Download Options
 
 - **GitHub Releases**: Visit our [GitHub Releases page](https://github.com/daniyalareeb/danai-task-manager/releases)
-- **Raw File**: [Direct link to APK file](https://github.com/daniyalareeb/danai-task-manager/raw/main/releases/danai-task-manager-android.apk)
+- **View on GitHub**: [Browse releases folder](https://github.com/daniyalareeb/danai-task-manager/tree/main/releases)
 
 ### Installation Instructions
 
@@ -52,7 +52,9 @@ Or right-click and "Save Link As" if the direct download doesn't work.
 
 We're working on the iOS version. Check back soon or watch this repository for updates.
 
-**👉 [iOS IPA file will be available here](releases/danai-task-manager-ios.ipa)** (when ready)
+**👉 [iOS IPA file will be available here](https://github.com/daniyalareeb/danai-task-manager/raw/main/releases/danai-task-manager-ios.ipa)** (when ready)
+
+This will start the download immediately when the iOS build is ready.
 
 ### iOS Requirements (When Available)
 

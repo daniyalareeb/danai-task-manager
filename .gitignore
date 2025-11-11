@@ -41,9 +41,12 @@ android/app/build
 android/.gradle
 android/captures
 android/local.properties
-*.apk
 *.ap_
 *.aab
+
+# Allow APK files in releases folder for downloads
+!releases/*.apk
+!releases/*.ipa
 
 # Logs
 *.log
