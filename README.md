@@ -240,10 +240,14 @@ danai-task-manager/
 ## 📥 Download Mobile Apps
 
 ### Android
-Download the latest Android APK from our [Downloads Page](DOWNLOADS.md) or [GitHub Releases](https://github.com/daniyalareeb/danai-task-manager/releases).
+**👉 [Download Android APK Now](https://github.com/daniyalareeb/danai-task-manager/raw/main/releases/danai-task-manager-android.apk)**
+
+Or visit our [Downloads Page](DOWNLOADS.md) for detailed instructions.
 
 ### iOS
-iOS version coming soon! Check the [Downloads Page](DOWNLOADS.md) for updates.
+**👉 [iOS Download](https://github.com/daniyalareeb/danai-task-manager/raw/main/releases/danai-task-manager-ios.ipa)** (Coming Soon)
+
+Check the [Downloads Page](DOWNLOADS.md) for updates.
 
 ## 🧪 Testing
 
