@@ -18,26 +18,27 @@ jobs:
     
     - name: Install Node.js 20 using nvm
       run: |
-        # Install nvm if not available
+        # Install nvm
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
         export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" || {
-          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-          export NVM_DIR="$HOME/.nvm"
-          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-        }
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
         
         # Install and use Node.js 20
         nvm install 20
         nvm use 20
-        nvm alias default 20
+        
+        # Get the exact Node.js path
+        NODE_PATH=$(nvm which 20)
+        NODE_DIR=$(dirname "$NODE_PATH")
         
         # Verify installation
-        node --version
-        npm --version
+        "$NODE_PATH" --version
+        "$NODE_DIR/npm" --version
         
-        # Add to PATH for subsequent steps
-        echo "NODE_VERSION=$(node --version)" >> $GITHUB_ENV
-        echo "$HOME/.nvm/versions/node/$(node --version | cut -d'v' -f2)/bin" >> $GITHUB_PATH
+        # Add to PATH for ALL subsequent steps
+        echo "$NODE_DIR" >> $GITHUB_PATH
+        echo "NODE_VERSION=$("$NODE_PATH" --version)" >> $GITHUB_ENV
+        echo "NODE_PATH=$NODE_DIR" >> $GITHUB_ENV
     
     - name: Verify Node.js version
       run: |
@@ -52,10 +53,17 @@ jobs:
         echo "✓ Node.js version check passed: $(node --version)"
     
     - name: Install dependencies
-      run: npm ci
+      run: |
+        # Ensure Node.js 20 is in PATH
+        export PATH="$NODE_PATH:$PATH"
+        node --version
+        npm ci
     
     - name: Build web assets
-      run: npm run build:web
+      run: |
+        export PATH="$NODE_PATH:$PATH"
+        node --version
+        npm run build:web
     
     - name: Verify Node.js before Capacitor
       run: |
@@ -65,7 +73,10 @@ jobs:
         node --version | grep -q "v2[0-9]" || (echo "Node.js version must be >= 20.0.0" && exit 1)
     
     - name: Sync Capacitor
-      run: npx cap sync ios
+      run: |
+        export PATH="$NODE_PATH:$PATH"
+        node --version
+        npx cap sync ios
     
     - name: Install CocoaPods
       run: |
