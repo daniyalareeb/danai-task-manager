@@ -16,6 +16,9 @@ const config: CapacitorConfig = {
       keystorePath: undefined,
       keystoreAlias: undefined
     }
+  },
+  ios: {
+    contentInset: 'automatic'
   }
 };
 

@@ -237,6 +237,14 @@ danai-task-manager/
 - **Touch Optimized**: Large touch targets, swipe-friendly
 - **Offline Support**: App works with cached data when server unavailable
 
+## 📥 Download Mobile Apps
+
+### Android
+Download the latest Android APK from our [Downloads Page](DOWNLOADS.md) or [GitHub Releases](https://github.com/daniyalareeb/danai-task-manager/releases).
+
+### iOS
+iOS version coming soon! Check the [Downloads Page](DOWNLOADS.md) for updates.
+
 ## 🧪 Testing
 
 ```bash
