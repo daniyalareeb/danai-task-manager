@@ -48,13 +48,21 @@ This will start the download immediately. Works on mobile and desktop!
 
 ## iOS Download
 
-### Coming Soon! 🚀
+### Automated Builds via GitHub Actions 🚀
 
-We're working on the iOS version. Check back soon or watch this repository for updates.
+The iOS app is automatically built using GitHub Actions whenever code is pushed to the repository!
 
-**👉 [iOS IPA file will be available here](https://github.com/daniyalareeb/danai-task-manager/raw/main/releases/danai-task-manager-ios.ipa)** (when ready)
+**👉 [Download iOS IPA](https://github.com/daniyalareeb/danai-task-manager/raw/main/releases/danai-task-manager-ios.ipa)**
 
-This will start the download immediately when the iOS build is ready.
+**Note**: If the IPA file shows 404, the build might still be running. Check the [Actions tab](https://github.com/daniyalareeb/danai-task-manager/actions) to see build status.
+
+### How to Trigger iOS Build
+
+1. **Automatic**: Just push code to the `main` branch
+2. **Manual**: Go to [Actions](https://github.com/daniyalareeb/danai-task-manager/actions) → "Build iOS App" → "Run workflow"
+3. **Download**: Once build completes, download from [releases folder](https://github.com/daniyalareeb/danai-task-manager/tree/main/releases) or [Actions artifacts](https://github.com/daniyalareeb/danai-task-manager/actions)
+
+See [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md) for detailed information.
 
 ### iOS Requirements (When Available)
 
