@@ -39,6 +39,13 @@ jobs:
     - name: Build web assets
       run: npm run build:web
     
+    - name: Verify Node.js before Capacitor
+      run: |
+        echo "Current Node.js version:"
+        node --version
+        echo "Required: >= 20.0.0"
+        node --version | grep -q "v2[0-9]" || (echo "Node.js version must be >= 20.0.0" && exit 1)
+    
     - name: Sync Capacitor
       run: npx cap sync ios
     
