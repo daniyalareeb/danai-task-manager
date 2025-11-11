@@ -70,17 +70,70 @@ jobs:
       with:
         xcode-version: '16.1'
     
+    - name: List available SDKs
+      working-directory: ios/App
+      run: |
+        echo "Available iOS SDKs:"
+        xcodebuild -showsdks | grep iphoneos || true
+        echo ""
+        echo "Available destinations:"
+        xcodebuild -workspace App.xcworkspace -scheme App -showdestinations || true
+    
     - name: Build iOS Archive
       working-directory: ios/App
       run: |
         # Clean build folder
         rm -rf build
         
+        # Find available iOS SDK version (get the version number from the SDK list)
+        echo "=== Listing all available SDKs ==="
+        xcodebuild -showsdks
+        
+        echo ""
+        echo "=== Extracting iOS SDK version ==="
+        # Get all iOS SDKs and extract version numbers
+        SDK_LINES=$(xcodebuild -showsdks | grep "iphoneos")
+        echo "Found SDK lines:"
+        echo "$SDK_LINES"
+        
+        # Extract version number from the first available SDK (e.g., "18.0" from "iphoneos18.0")
+        # Try multiple patterns to extract the version
+        AVAILABLE_SDK=$(echo "$SDK_LINES" | head -1 | grep -oE 'iphoneos[0-9]+\.[0-9]+' | sed 's/iphoneos//' | head -1)
+        
+        # If still not found, try simpler pattern
+        if [ -z "$AVAILABLE_SDK" ]; then
+          AVAILABLE_SDK=$(echo "$SDK_LINES" | head -1 | sed -n 's/.*iphoneos\([0-9.]*\).*/\1/p' | head -1)
+        fi
+        
+        # If still not found, try without the dot
+        if [ -z "$AVAILABLE_SDK" ]; then
+          AVAILABLE_SDK=$(echo "$SDK_LINES" | head -1 | grep -oE 'iphoneos[0-9]+' | sed 's/iphoneos//' | head -1)
+        fi
+        
+        echo "Extracted SDK version: '$AVAILABLE_SDK'"
+        
+        # Use the available SDK explicitly - MUST specify version to avoid defaulting to 18.1
+        if [ -n "$AVAILABLE_SDK" ] && [ "$AVAILABLE_SDK" != "" ]; then
+          SDK_ARG="-sdk iphoneos${AVAILABLE_SDK}"
+          echo "Using SDK: $SDK_ARG"
+        else
+          echo "ERROR: Could not detect available iOS SDK version!"
+          echo "Available SDKs:"
+          xcodebuild -showsdks | grep iphoneos
+          exit 1
+        fi
+        DEPLOYMENT_TARGET="14.0"
+        
+        echo "SDK argument: $SDK_ARG"
+        echo "Deployment target: $DEPLOYMENT_TARGET"
+        
         # Build for generic iOS device (no signing required for basic build)
+        # Use available SDK but keep deployment target at 14.0 (project minimum)
         xcodebuild -workspace App.xcworkspace \
           -scheme App \
           -configuration Release \
-          -sdk iphoneos \
+          $SDK_ARG \
+          IPHONEOS_DEPLOYMENT_TARGET="$DEPLOYMENT_TARGET" \
           -destination 'generic/platform=iOS' \
           -archivePath build/App.xcarchive \
           archive \
@@ -90,11 +143,12 @@ jobs:
           CODE_SIGNING_ALLOWED=NO \
           PROVISIONING_PROFILE_SPECIFIER="" \
           DEVELOPMENT_TEAM="" || {
-            echo "Archive build failed, trying build instead..."
+            echo "Archive build failed, trying build without archive..."
             xcodebuild -workspace App.xcworkspace \
               -scheme App \
               -configuration Release \
-              -sdk iphoneos \
+              $SDK_ARG \
+              IPHONEOS_DEPLOYMENT_TARGET="$DEPLOYMENT_TARGET" \
               -destination 'generic/platform=iOS' \
               -derivedDataPath build/DerivedData \
               CODE_SIGN_IDENTITY="" \
