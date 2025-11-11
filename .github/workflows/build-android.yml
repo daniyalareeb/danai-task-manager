@@ -24,14 +24,20 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20.x'
+        node-version: '20'
         cache: 'npm'
     
     - name: Verify Node.js version
       run: |
+        echo "Checking Node.js version..."
         node --version
         npm --version
-        echo "Node.js version check passed"
+        NODE_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
+        if [ "$NODE_VERSION" -lt 20 ]; then
+          echo "ERROR: Node.js version must be >= 20.0.0, but got $(node --version)"
+          exit 1
+        fi
+        echo "✓ Node.js version check passed: $(node --version)"
     
     - name: Setup Java
       uses: actions/setup-java@v4
